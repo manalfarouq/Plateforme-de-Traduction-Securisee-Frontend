@@ -1,0 +1,144 @@
+/* ===== ALERT MODAL ===== */
+.alert-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.alert-modal {
+  background-color: #1a1a1a;
+  border: 2px solid var(--color-primary);
+  padding: 30px;
+  border-radius: 5px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+  font-family: var(--font-mono);
+  animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.alert-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.alert-header h2 {
+  color: var(--color-primary);
+  font-size: 18px;
+  text-shadow: 0 0 10px var(--color-primary);
+  margin: 0;
+}
+
+.alert-body {
+  margin-bottom: 20px;
+}
+
+.alert-body p {
+  color: var(--color-primary);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 5px 0;
+}
+
+.alert-question {
+  text-align: center;
+  margin-bottom: 25px;
+  padding: 15px 0;
+  border-top: 1px solid var(--color-primary);
+  border-bottom: 1px solid var(--color-primary);
+}
+
+.alert-question p {
+  color: var(--color-primary);
+  font-size: 14px;
+  margin: 0;
+}
+
+.alert-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.alert-btn {
+  padding: 10px 20px;
+  border: 1px solid var(--color-primary);
+  background-color: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.alert-btn:hover {
+  background-color: var(--color-primary);
+  color: var(--color-bg-dark);
+  box-shadow: 0 0 10px var(--color-primary);
+}
+
+.alert-btn:active {
+  transform: scale(0.95);
+}
+
+.alert-btn-reject:hover {
+  border-color: #ff6b6b;
+  background-color: #ff6b6b;
+  box-shadow: 0 0 10px #ff6b6b;
+}
+
+.alert-btn-accept {
+  background-color: rgba(0, 255, 0, 0.1);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .alert-modal {
+    max-width: 90%;
+    padding: 20px;
+  }
+
+  .alert-header h2 {
+    font-size: 16px;
+  }
+
+  .alert-body p {
+    font-size: 12px;
+  }
+
+  .alert-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+}
