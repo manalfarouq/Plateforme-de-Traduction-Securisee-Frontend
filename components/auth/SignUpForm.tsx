@@ -7,8 +7,8 @@ import { MESSAGES } from "@/lib/constants";
 export default function SignupForm() {
   const router = useRouter();
   const [username, setUsername] = useState("");
-//   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
   const [confirm, setConfirm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -18,9 +18,10 @@ export default function SignupForm() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setSuccess(false);
 
-    // Validation
-    if (!username.trim() || !password.trim() || !confirm.trim()) {
+    // VALIDATION
+    if (!username.trim() || !role.trim() ||!password.trim() || !confirm.trim()) {
       setError("Tous les champs sont requis");
       setIsLoading(false);
       return;
@@ -32,21 +33,88 @@ export default function SignupForm() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Le mot de passe doit contenir au moins 6 caractères");
+    if (password.length < 4) {
+      setError("Le mot de passe doit contenir au moins 4 caractères");
       setIsLoading(false);
       return;
     }
 
-    // Simuler la création du profil
-    setTimeout(() => {
-      setSuccess(true);
+    if (role !== "user" && role !== "admin") {
+      setError("Le role doit être user/admin");
+      setIsLoading(false);
+      return;
+    }
+
+
+    try {
+      // CONFIGURATION API
+      const API_URL = 'http://localhost:8000';
+
+      console.log("URL appelée:", `${API_URL}/register/register`);
+      console.log("Données envoyées:", { username: username.trim(), password: "[HIDDEN]" , role: role.trim()});
+
+      // APPEL API
+      const response = await fetch(`${API_URL}/register/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: username.trim(),
+          password: password.trim(),
+          role: role.trim(),
+        }),
+      });
+
+      console.log("Status:", response.status);
+
+
+      // Lire la réponse en tant que texte d'abord
+      const responseText = await response.text();
+      console.log("Réponse brute:", responseText);
+
+      // PARSING RÉPONSE
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log("Réponse JSON:", data);
+      } catch (parseError) {
+        console.error("Impossible de parser JSON:", parseError);
+        throw new Error(`Réponse invalide du serveur: ${responseText.substring(0, 100)}`);
+      }
+
+      // VÉRIFIER STATUS
+      if (!response.ok) {
+        const errorMsg = data.detail 
+          ? (Array.isArray(data.detail) 
+              ? JSON.stringify(data.detail, null, 2) 
+              : data.detail)
+          : data.message || "Erreur lors de l'inscription";
+        console.error("Erreur API détaillée:", errorMsg);
+        throw new Error(errorMsg);
+      }
+
+      // SUCCÈS - SAUVEGARDER TOKEN (si l'API retourne un token)
+      if (data.token || data.access_token) {
+        localStorage.setItem("token", data.token || data.access_token);
+      }
+      localStorage.setItem("username", username);
       localStorage.setItem("user_session", JSON.stringify({ username }));
 
+      setSuccess(true);
+
+      // REDIRECTION
       setTimeout(() => {
         router.push("/translator");
       }, 1500);
-    }, 1000);
+    } catch (err) {
+      // GESTION ERREUR
+      const errorMessage = err instanceof Error ? err.message : "Une erreur est survenue";
+      setError(errorMessage);
+      console.error("Erreur signup:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (success) {
@@ -76,17 +144,6 @@ export default function SignupForm() {
             />
           </div>
 
-          {/* <div className="terminal-form-group">
-            <label>{MESSAGES.SIGNUP.EMAIL}</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="email@example.com"
-              disabled={isLoading}
-            />
-          </div> */}
-
           <div className="terminal-form-group">
             <label>{MESSAGES.SIGNUP.PASSWORD}</label>
             <input
@@ -97,6 +154,8 @@ export default function SignupForm() {
               disabled={isLoading}
             />
           </div>
+
+          
 
           <div className="terminal-form-group">
             <label>{MESSAGES.SIGNUP.CONFIRM}</label>
@@ -109,7 +168,18 @@ export default function SignupForm() {
             />
           </div>
 
-          {error && <div className="terminal-error"> {error}</div>}
+          <div className="terminal-form-group">
+            <label>{MESSAGES.SIGNUP.ROLE}</label>
+            <input
+              type="text"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              placeholder="ex : user/admin"
+              disabled={isLoading}
+            />
+          </div>
+
+          {error && <div className="terminal-error">{error}</div>}
 
           <button
             type="submit"
@@ -128,7 +198,7 @@ export default function SignupForm() {
                 cursor: "pointer",
               }}
             >
-                Jai déjà un compte
+              jai déjà un compte
             </a>
           </div>
         </div>

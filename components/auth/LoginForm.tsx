@@ -10,27 +10,75 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setSuccess(false);
 
-    // Validation simple
+    // VALIDATION
     if (!username.trim() || !password.trim()) {
       setError("Veuillez remplir tous les champs");
       setIsLoading(false);
       return;
     }
 
-    // Simuler une authentification
-    setTimeout(() => {
-      // Accepter tous les logins pour la démo
+    try {
+      // CONFIGURATION API
+      const API_URL = "http://localhost:8000";
+
+      // APPEL API
+      const response = await fetch(`${API_URL}/login/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: username.trim(),
+          password: password.trim(),
+        }),
+      });
+
+      // PARSING RÉPONSE
+      const data = await response.json();
+
+      // VÉRIFIER STATUS
+      if (!response.ok) {
+        throw new Error(data.detail || data.message || "Erreur de connexion");
+      }
+
+      // SUCCÈS - SAUVEGARDER TOKEN
+      localStorage.setItem("token", data.token || data.access_token);
+      localStorage.setItem("username", username);
       localStorage.setItem("user_session", JSON.stringify({ username }));
+
+      setSuccess(true);
+
+      // REDIRECTION
+      setTimeout(() => {
+        router.push("/translator");
+      }, 1000);
+    } catch (err) {
+      // GESTION ERREUR
+      const errorMessage = err instanceof Error ? err.message : "Une erreur est survenue";
+      setError(errorMessage);
+      console.error("Erreur login:", err);
+    } finally {
       setIsLoading(false);
-      router.push("/translator");
-    }, 1000);
+    }
   };
+
+  if (success) {
+    return (
+      <div className="terminal-form">
+        <div className="terminal-line" style={{ color: "var(--color-primary)" }}>
+          Connexion réussie ! Redirection...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="terminal-form">
@@ -79,7 +127,7 @@ export default function LoginForm() {
                 cursor: "pointer",
               }}
             >
-               Créer un compte
+              Créer un compte
             </a>
           </div>
         </div>

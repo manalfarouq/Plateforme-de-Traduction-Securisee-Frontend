@@ -17,8 +17,8 @@ export default function TranslatorPage() {
   const [username, setUsername] = useState("");
   const [direction, setDirection] = useState<"FR->EN" | "EN->FR">("FR->EN");
   const [isInitialized, setIsInitialized] = useState(false);
-  
-//   eslint-disable-next-line react-hooks/exhaustive-deps
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     // Récupérer le username depuis localStorage
     const session = localStorage.getItem("user_session");
@@ -52,6 +52,77 @@ export default function TranslatorPage() {
     tutorial();
   }, [isInitialized]);
 
+  // FONCTION: Appeler l'API de traduction
+  const translateText = async (text: string, dir: "FR->EN" | "EN->FR") => {
+    try {
+      setError(null);
+
+      // CONFIGURATION API
+      const API_URL = "http://localhost:8000";
+      const token = localStorage.getItem("token");
+
+      // CONSTRUIRE L'URL SELON LA DIRECTION
+      const urlPath = dir === "FR->EN" ? "fr-en" : "en-fr";
+      const endpoint = `${API_URL}/traduction/traduire/${urlPath}`;
+
+      console.log("URL appelée:", endpoint);
+      console.log("Token:", token ? "✓ présent" : "✗ manquant");
+      console.log("Texte envoyé:", text.trim());
+
+      // APPEL API
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "token": token || "",
+        },
+        body: JSON.stringify({
+          text: text.trim(),
+          source_language: dir === "FR->EN" ? "fr" : "en",
+          target_language: dir === "FR->EN" ? "en" : "fr"
+        }),
+      });
+
+      console.log("Status:", response.status);
+      console.log("Headers:", response.headers);
+
+      // Lire la réponse en tant que texte d'abord
+      const responseText = await response.text();
+      console.log("Réponse brute:", responseText);
+
+      // Tenter de parser en JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log("Réponse JSON:", data);
+      } catch (parseError) {
+        console.error("Impossible de parser JSON:", parseError);
+        throw new Error(`Réponse invalide du serveur: ${responseText.substring(0, 100)}`);
+      }
+
+      // VÉRIFIER STATUS
+      if (!response.ok) {
+        const errorMsg = data.detail 
+          ? (Array.isArray(data.detail) 
+              ? JSON.stringify(data.detail, null, 2) 
+              : data.detail)
+          : data.message || JSON.stringify(data);
+        console.error("Erreur API détaillée:", errorMsg);
+        throw new Error(errorMsg);
+      }
+
+      // RETOURNER LE TEXTE TRADUIT
+      const result = data.translated_text || data.translated || data.translation || data.result || text;
+      console.log("Traduction réussie:", result);
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : JSON.stringify(err);
+      setError(errorMessage);
+      console.error("Erreur complète:", err);
+      return null;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -65,12 +136,13 @@ export default function TranslatorPage() {
 
     // Gestion des commandes spéciales
     if (userMessage === "/swap") {
-      setDirection(direction === "FR->EN" ? "EN->FR" : "FR->EN");
+      const newDirection = direction === "FR->EN" ? "EN->FR" : "FR->EN";
+      setDirection(newDirection);
       setMessages((prev) => [
         ...prev,
         {
           type: "zoro",
-          text: `[MODE INVERSÉ: ${direction === "FR->EN" ? "EN->FR" : "FR->EN"}]`,
+          text: `[MODE INVERSÉ: ${newDirection}]`,
         },
       ]);
       return;
@@ -92,20 +164,44 @@ export default function TranslatorPage() {
       return;
     }
 
-    // Simuler une traduction
+    // Appeler la vraie API de traduction
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 500));
 
+    // Afficher "Analyse sémantique"
     setMessages((prev) => [
       ...prev,
       { type: "zoro", text: "zoro: [ANALYSE SÉMANTIQUE...]" },
     ]);
 
-    await new Promise((r) => setTimeout(r, 800));
+    await new Promise((r) => setTimeout(r, 500));
 
-    // Simuler une traduction (en production, appeler une API)
-    const simulated = `zoro: [Traduction simulée de: "${userMessage}"]`;
-    setMessages((prev) => [...prev, { type: "zoro", text: simulated }]);
+    // Appeler l'API
+    const translation = await translateText(userMessage, direction);
+
+    if (translation && translation !== userMessage) {
+      // Afficher la traduction
+      const result = `zoro: ${translation}`;
+      setMessages((prev) => [...prev, { type: "zoro", text: result }]);
+    } else if (!translation) {
+      // Erreur
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: "zoro",
+          text: `zoro: [ERREUR] ${error || "Impossible de traduire"}`,
+        },
+      ]);
+    } else {
+      // Texte identique (pas de traduction)
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: "zoro",
+          text: `zoro: [Aucune traduction nécessaire]`,
+        },
+      ]);
+    }
+
     setIsLoading(false);
   };
 
@@ -113,6 +209,8 @@ export default function TranslatorPage() {
     const confirmed = window.confirm(MESSAGES.TRANSLATOR.CONFIRM_LOGOUT);
     if (confirmed) {
       localStorage.removeItem("user_session");
+      localStorage.removeItem("token");
+      localStorage.removeItem("username");
       router.push("/");
     }
   };
@@ -122,6 +220,21 @@ export default function TranslatorPage() {
       <div className="terminal-line">
         zoro v2.47 | {direction} | User: {username}
       </div>
+
+      {error && (
+        <div
+          style={{
+            color: "#ff6b6b",
+            marginTop: "10px",
+            padding: "10px",
+            border: "1px solid #ff6b6b",
+            borderRadius: "3px",
+            fontSize: "12px",
+          }}
+        >
+          Erreur: {error}
+        </div>
+      )}
 
       <div style={{ marginTop: "20px", flexGrow: 1, overflow: "auto" }}>
         {messages.map((msg, idx) => (
@@ -146,7 +259,7 @@ export default function TranslatorPage() {
       </form>
 
       <div style={{ fontSize: "12px", marginTop: "10px", opacity: 0.7 }}>
-        Commandes: /swap /clear /help
+        Commandes: /swap /clear /help | Status: {isLoading ? "Traduction..." : "Prêt"}
       </div>
 
       <button className="disconnect-btn" onClick={handleDisconnect}>

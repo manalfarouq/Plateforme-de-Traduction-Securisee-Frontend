@@ -23,7 +23,6 @@ export const MESSAGES = {
     "CONNEXION AU NŒUD PRINCIPAL...",
     "IP LOCAL: [GENERÉ]",
     "PROTOCOLE ZORO ACTIVÉ...",
-    "DATE/HEURE: [SYSTÈME]",
     "LOCALISATION: [GÉNÉRÉ]",
     "ACCÈS ACCORDÉ",
     "SYSTÈME LANCÉ",
@@ -31,8 +30,12 @@ export const MESSAGES = {
   ],
 
   TERMINAL: {
-    HEADER_STATUS: "◉ NEURAL LINK ESTABLISHED",
-    HEADER_USER: "User: GUEST_1337 | Status: CONNECTED",
+    HEADER_STATUS: "◉ zoroTranslator",
+    // Fonction pour générer le header avec le username
+    getHeaderUser: (username?: string) => {
+      const user = username || getCurrentUsername();
+      return `User: ${user.toUpperCase()} | Status: CONNECTED`;
+    },
     SYSTEM_V1: ">>> SYSTÈME DE TRADUCTION QUANTIQUE v2.47",
     SYSTEM_V2: ">>> Alimenté par IA Horizon-7",
     ZORO_WELCOME: ">>> Bienvenue, utilisateur.",
@@ -61,6 +64,7 @@ export const MESSAGES = {
     EMAIL: ">>> Email (optionnel) :",
     PASSWORD: ">>> Mot de passe :",
     CONFIRM: ">>> Confirmation :",
+    ROLE: ">>> Role :",
     BUTTON: "CRÉER PROFIL",
     ERROR: "Erreur lors de la création du profil",
     SUCCESS: ">>> PROFIL CRÉÉ. CONNEXION AUTOMATIQUE...",
@@ -84,7 +88,6 @@ export const MESSAGES = {
   // ===== EASTER EGGS =====
   EASTER_EGGS: [
     ">>> SATELLITE 7 CONNECTÉ",
-    ">>> LATENCE: 0.03ms",
     ">>> TRADUCTIONS EFFECTUÉES: 847",
     ">>> BATTERIE IA: [████████░░] 82%",
     ">>> MODE PHANTOM ACTIVÉ",
@@ -138,9 +141,27 @@ export const STORAGE_KEYS = {
   USER_SESSION: "user_session",
   HACK_WATCHED: "hack_sequence_watched",
   USERNAME: "current_username",
+  TOKEN: "token",
 };
 
 // ===== HELPER FUNCTIONS =====
 export function getRandomEasterEgg(): string {
   return MESSAGES.EASTER_EGGS[Math.floor(Math.random() * MESSAGES.EASTER_EGGS.length)];
+}
+
+// Helper pour récupérer le username actuel
+export function getCurrentUsername(): string {
+  if (typeof window === "undefined") return "GUEST_1337";
+  
+  try {
+    const session = localStorage.getItem(STORAGE_KEYS.USER_SESSION);
+    if (session) {
+      const user = JSON.parse(session);
+      return user.username || "GUEST_1337";
+    }
+  } catch (error) {
+    console.error("Erreur lors de la récupération du username:", error);
+  }
+  
+  return "GUEST_1337";
 }

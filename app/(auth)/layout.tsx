@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MESSAGES } from "@/lib/constants";
+import { MESSAGES, getCurrentUsername } from "@/lib/constants";
 import "@/styles/terminal.css";
 
 export default function AuthLayout({
@@ -10,6 +10,36 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   const [easterEgg, setEasterEgg] = useState<string | null>(null);
+  // Initialiser directement avec getCurrentUsername (safe car exécuté côté client)
+  const [username, setUsername] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return getCurrentUsername();
+    }
+    return "GUEST_1337";
+  });
+
+  useEffect(() => {
+    // Écouter les changements de localStorage
+    const handleStorageChange = () => {
+      setUsername(getCurrentUsername());
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    
+    // Vérifier aussi toutes les 2 secondes (au cas où le storage change dans la même page)
+    const checkInterval = setInterval(() => {
+      const currentUser = getCurrentUsername();
+      setUsername((prev) => {
+        // Ne mettre à jour que si différent pour éviter les re-renders inutiles
+        return prev !== currentUser ? currentUser : prev;
+      });
+    }, 2000);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(checkInterval);
+    };
+  }, []);
 
   useEffect(() => {
     // Afficher un easter egg aléatoire toutes les 30 secondes
@@ -20,8 +50,7 @@ export default function AuthLayout({
         setEasterEgg(egg);
 
         // Disparaître après 4 secondes
-        const timeout = setTimeout(() => setEasterEgg(null), 4000);
-        return () => clearTimeout(timeout);
+        setTimeout(() => setEasterEgg(null), 4000);
       }
     }, 30000);
 
@@ -35,7 +64,7 @@ export default function AuthLayout({
           {MESSAGES.TERMINAL.HEADER_STATUS}
         </span>
         <span className="terminal-user">
-          {MESSAGES.TERMINAL.HEADER_USER}
+          {MESSAGES.TERMINAL.getHeaderUser(username)}
         </span>
       </header>
 
