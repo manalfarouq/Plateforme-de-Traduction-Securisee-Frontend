@@ -6,6 +6,9 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "zoroTranslator",
+  icons: {
+    icon: "/icon_hacking.png",
+  },
 };
 
 export default function RootLayout({
