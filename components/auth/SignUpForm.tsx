@@ -149,7 +149,7 @@ export default function SignupForm() {
                 type="password"
                 value={adminCode}
                 onChange={(e) => setAdminCode(e.target.value)}
-                placeholder="Entrez le code admin..."
+                placeholder="Code 2480..."
                 disabled={isLoading}
               />
             </div>
