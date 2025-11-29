@@ -142,3 +142,131 @@
     font-size: 12px;
   }
 }
+
+/* === AJOUT GLITCH (DÉMARRAGE DU HACK) === */
+
+/* 1. L'Overlay clignote en rouge/noir pour un effet d'urgence */
+.glitch-overlay-active {
+  background-color: rgba(0, 0, 0, 0.9) !important;
+  animation: bg-flash 0.1s infinite steps(1); /* Clignotement rapide */
+}
+
+@keyframes bg-flash {
+  0% { background-color: rgba(0, 0, 0, 0.9); }
+  50% { background-color: rgba(50, 0, 0, 0.9); } /* Flash rouge subtil */
+  100% { background-color: rgba(0, 0, 0, 0.9); }
+}
+
+/* 2. La Modale entière se déforme et s'anime */
+.alert-modal.glitching {
+  /* Annule les animations d'entrée initiales */
+  animation: none; 
+  
+  /* Nouvel effet de bordure et d'ombre rouge */
+  border-color: #ff0000; 
+  box-shadow: 0 0 20px #ff0000;
+  
+  /* Secousse et Découpage de la boîte */
+  animation: modal-shake 0.05s infinite, modal-slice 0.1s infinite linear;
+}
+
+/* Effet de secousse violente */
+@keyframes modal-shake {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  25% { transform: translate(-3px, 3px) rotate(-0.5deg) scale(1.01); }
+  50% { transform: translate(3px, -3px) rotate(0.5deg) scale(1); }
+  75% { transform: translate(-3px, -3px) rotate(-0.5deg) scale(1.01); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+}
+
+/* Effet de découpage (Slicing) sur la boîte */
+@keyframes modal-slice {
+  0% { clip-path: inset(20% 0 50% 0); }
+  33% { clip-path: inset(10% 0 10% 0); }
+  66% { clip-path: inset(50% 0 20% 0); }
+  100% { clip-path: inset(0% 0 80% 0); }
+}
+
+/* 3. Le Texte du titre (H2) se dédouble (Glitch RGB) */
+.glitch-text {
+  position: relative;
+  /* Changement de couleur du texte */
+  color: #fff !important; 
+  /* Début de l'animation de scintillement */
+  animation: text-flicker 0.1s infinite;
+  text-shadow: 2px 0 #ff00c1, -2px 0 #00fff9; /* RGB Split de base */
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text); /* Récupère le texte du h2 */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+  /* Utilise les keyframes des glitche-text pour le mouvement */
+  animation: glitch-text-move 0.3s infinite step-end;
+}
+
+/* Le fantôme ROUGE/CYAN (avant) */
+.glitch-text::before {
+  color: #ff00c1;
+  transform: translate(-3px, 0);
+  z-index: -1;
+}
+
+/* Le fantôme BLEU/VERT (après) */
+.glitch-text::after {
+  color: #00fff9;
+  transform: translate(3px, 0);
+  z-index: -2;
+}
+
+/* Animation de mouvement aléatoire pour les pseudo-éléments */
+@keyframes glitch-text-move {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-5px, 0); }
+  50% { transform: translate(5px, 0); }
+  75% { transform: translate(-5px, 0); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Scintillement du texte */
+@keyframes text-flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; text-shadow: 2px 0 #ff00c1, -2px 0 #00fff9; }
+  20%, 24%, 55% { opacity: 0.5; text-shadow: none; }
+}
+
+/* 4. Le Corps du Texte devient agressif (rouge, illisible) */
+.glitch-text-sm {
+  color: #ff0000 !important; /* Texte devient rouge vif */
+  font-family: 'Times New Roman', serif !important; /* Fait "bugger" la police */
+  font-weight: bold;
+  transform: skew(-1deg); /* légère déformation */
+  text-shadow: 0 0 5px #ff0000;
+  animation: text-flicker-sm 0.1s infinite;
+}
+
+@keyframes text-flicker-sm {
+  0% { opacity: 1; transform: skew(-1deg); }
+  50% { opacity: 0.9; transform: skew(1deg); }
+  100% { opacity: 1; transform: skew(-1deg); }
+}
+
+/* 5. Le Bouton OUI change d'aspect (style ERREUR) */
+.btn-glitch-active {
+  background-color: #ff0000 !important;
+  color: #000 !important;
+  border: 2px solid #fff !important;
+  box-shadow: 0 0 10px #ff0000;
+  font-weight: 900;
+  animation: btn-strobe 0.1s infinite;
+}
+
+@keyframes btn-strobe {
+  0% { opacity: 1; }
+  50% { opacity: 0.8; }
+  100% { opacity: 1; }
+}

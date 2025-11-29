@@ -42,13 +42,12 @@ export default function HackSequence({ isActive, onComplete }: HackSequenceProps
       "INITIALISATION...",
       "CONNEXION AU NŒUD PRINCIPAL...",
       `IP LOCAL: ${generateRandomIP()}`,
-      "PROTOCOLE zoro ACTIVÉ...",
+      "PROTOCOLE ZERO ACTIVÉ...",
       `DATE/HEURE: ${new Date().toLocaleString("fr-FR")}`,
       `FINGERPRINT: ${generateRandomHash()}`,
       `LOCALISATION: ${generateRandomGPS()}`,
       "ACCÈS ACCORDÉ",
       "SYSTÈME LANCÉ",
-      "INITIALISATION SYSTÈME: [████████████] 100%",
     ];
 
     interface PhaseTimeline {
@@ -56,10 +55,11 @@ export default function HackSequence({ isActive, onComplete }: HackSequenceProps
       duration: number;
     }
 
+    // J'ai rétabli ici la durée courte du glitch original (phase 2) car il n'y a plus de gros texte à lire.
     const phaseTimeline: PhaseTimeline[] = [
-      { phase: "shake", duration: 100 },
-      { phase: "glitch", duration: 300 },
-      { phase: "black", duration: 500 },
+      { phase: "shake", duration: 200 },
+      { phase: "glitch", duration: 300 }, // Raccourci car plus de texte à afficher
+      { phase: "black", duration: 200 },
       { phase: "code", duration: 3000 },
       { phase: "scanlines", duration: 1000 },
       { phase: "complete", duration: 1500 },
@@ -76,11 +76,9 @@ export default function HackSequence({ isActive, onComplete }: HackSequenceProps
             if (textIndex < fullSequence.length) {
               setDisplayText((prev) => prev + fullSequence[textIndex] + "\n");
               textIndex += 1;
-
               const progressPercent = (textIndex / fullSequence.length) * 100;
               setProgress(progressPercent);
-
-              timeoutId = setTimeout(addText, 400);
+              timeoutId = setTimeout(addText, 300);
             }
           };
           addText();
@@ -104,42 +102,28 @@ export default function HackSequence({ isActive, onComplete }: HackSequenceProps
 
   return (
     <div className={`hack-sequence hack-phase-${phase}`}>
-      {/* EFFECT SHAKE */}
-      {phase === "shake" && <div className="hack-shake-effect" />}
-
-      {/* EFFECT GLITCH RGB */}
-      {phase === "glitch" && (
-        <div className="hack-glitch-container">
-          <div className="glitch-layer glitch-red" />
-          <div className="glitch-layer glitch-green" />
-          <div className="glitch-layer glitch-blue" />
-        </div>
-      )}
-
-      {/* SCANLINES */}
+      
+      {/* SCANLINES (Toujours visible pour l'effet rétro) */}
       <div className="scanlines" />
 
-      {/* CONTENT */}
-      <div className="hack-content">
-        <pre className="hack-text">{displayText}</pre>
+      {/* --- PHASE 1 & 2: LE GROS GLITCH RETIRÉ --- */}
+      {/* Le conteneur glitch-title-container a été supprimé ici 
+        pour ne plus afficher le texte "SYSTEM FAILURE" / "GLITCH".
+      */}
 
-        {/* LOADING BAR */}
-        {phase === "code" && (
+      {/* --- PHASE 4: LE CODE TERMINAL --- */}
+      {phase === "code" && (
+        <div className="hack-content">
+          <pre className="hack-text">{displayText}</pre>
+
           <div className="loading-bar">
             <div className="loading-bar-fill" style={{ width: `${progress}%` }} />
             <span className="loading-percentage">{Math.round(progress)}%</span>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* ACCESS GRANTED MESSAGE */}
-        {(phase === "scanlines" || phase === "complete") && (
-          <div className="access-granted-message">
-            <span className="blink">▶ ACCÈS ACCORDÉ ▶</span>
-          </div>
-        )}
-      </div>
-
-      {/* TUNNEL EFFECT FOR TRANSITION */}
+      {/* --- PHASE FINALE: TUNNEL --- */}
       {phase === "complete" && <div className="tunnel-zoom" />}
     </div>
   );
