@@ -44,7 +44,7 @@ export const MESSAGES = {
 
   ZORO_TUTORIAL: [
     ">>> ZORO: Première fois ici ? Laisse-moi t&apos;expliquer.",
-    ">>> ZORO: J&apos;intercepte tes mots en français et les transforme en anglais.",
+    ">>> ZORO: J'intercepte tes mots en français et les transforme en anglais.",
     ">>> ZORO: Tape simplement ta phrase et appuie sur ENTER.",
     ">>> ZORO: Tu peux aussi utiliser /swap pour inverser la direction.",
     ">>> ZORO: Prêt ? Commence à écrire!",
