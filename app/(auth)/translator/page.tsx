@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MESSAGES, TIMINGS } from "@/lib/constants";
-import { apiService } from "@/lib/apiService"; // ✅ CORRECTION: Utiliser le service centralisé
-import { useAuth } from "@/hooks/useAuth"; // ✅ CORRECTION: Utiliser le hook centralisé
+import { apiService } from "@/lib/apiService";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Message {
   type: "user" | "zoro";
@@ -14,7 +14,6 @@ interface Message {
 export default function TranslatorPage() {
   const router = useRouter();
   
-  // ✅ CORRECTION: Utiliser le hook useAuth au lieu de faire la vérif ici
   const { username, isChecking, isAuthenticated } = useAuth();
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -24,16 +23,15 @@ export default function TranslatorPage() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ✅ CORRECTION: Vérifier l'authentification et rediriger si nécessaire
   useEffect(() => {
-    if (isChecking) return; // Attendre la fin de la vérification
+    if (isChecking) return;
 
     if (!isAuthenticated) {
-      router.push("/login"); // Rediriger si pas authentifié
+      router.push("/login");
       return;
     }
 
-    setIsInitialized(true); // On peut afficher le contenu
+    setIsInitialized(true);
   }, [isChecking, isAuthenticated, router]);
 
   // Afficher le tutoriel quand initialisé
@@ -50,92 +48,90 @@ export default function TranslatorPage() {
     tutorial();
   }, [isInitialized]);
 
-  // ✅ CORRECTION: Utiliser le service API centralisé
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (!input.trim()) return;
+  if (!input.trim()) return;
 
-    const userMessage = input.trim();
-    setInput("");
+  const userMessage = input.trim();
+  setInput("");
 
-    // Ajouter le message utilisateur
-    setMessages((prev) => [...prev, { type: "user", text: `> user: ${userMessage}` }]);
+  // Afficher le username en majuscules
+  setMessages((prev) => [...prev, { type: "user", text: `> ${username.toUpperCase()}: ${userMessage}` }]);
 
-    // Gestion des commandes spéciales
-    if (userMessage === "/swap") {
-      const newDirection = direction === "FR->EN" ? "EN->FR" : "FR->EN";
-      setDirection(newDirection);
-      setMessages((prev) => [
-        ...prev,
-        {
-          type: "zoro",
-          text: `[MODE INVERSÉ: ${newDirection}]`,
-        },
-      ]);
-      return;
-    }
-
-    if (userMessage === "/clear") {
-      setMessages([]);
-      return;
-    }
-
-    if (userMessage === "/help") {
-      setMessages((prev) => [
-        ...prev,
-        {
-          type: "zoro",
-          text: "Commandes: /swap (inverser) | /clear (effacer) | /help (aide)",
-        },
-      ]);
-      return;
-    }
-
-    // Appeler la traduction
-    setIsLoading(true);
-
-    // Afficher "Analyse sémantique"
+  // Gestion des commandes spéciales
+  if (userMessage === "/swap") {
+    const newDirection = direction === "FR->EN" ? "EN->FR" : "FR->EN";
+    setDirection(newDirection);
     setMessages((prev) => [
       ...prev,
-      { type: "zoro", text: "zoro: [ANALYSE SÉMANTIQUE...]" },
+      {
+        type: "zoro",
+        text: `>>> ZORO: [MODE INVERSÉ: ${newDirection}]`,
+      },
     ]);
+    return;
+  }
 
-    await new Promise((r) => setTimeout(r, 500));
+  if (userMessage === "/clear") {
+    setMessages([]);
+    return;
+  }
 
-    try {
-      // ✅ CORRECTION: Utiliser le service API centralisé
-      const translation = await apiService.translate(userMessage, direction);
+  if (userMessage === "/help") {
+    setMessages((prev) => [
+      ...prev,
+      {
+        type: "zoro",
+        text: ">>> ZORO: Commandes: /swap (inverser) | /clear (effacer) | /help (aide)",
+      },
+    ]);
+    return;
+  }
 
-      if (translation && translation !== userMessage) {
-        // Afficher la traduction
-        const result = `zoro: ${translation}`;
-        setMessages((prev) => [...prev, { type: "zoro", text: result }]);
-      } else if (translation === userMessage) {
-        // Texte identique (pas de traduction)
-        setMessages((prev) => [
-          ...prev,
-          {
-            type: "zoro",
-            text: `zoro: [Aucune traduction nécessaire]`,
-          },
-        ]);
-      }
-    } catch (err) {
-      // Erreur
-      const errorMsg = err instanceof Error ? err.message : "Impossible de traduire";
-      setError(errorMsg);
+  // Appeler la traduction
+  setIsLoading(true);
+
+  // Afficher "Analyse sémantique"
+  setMessages((prev) => [
+    ...prev,
+    { type: "zoro", text: ">>> ZORO: [ANALYSE SÉMANTIQUE...]" },
+  ]);
+
+  await new Promise((r) => setTimeout(r, 500));
+
+  try {
+    const translation = await apiService.translate(userMessage, direction);
+
+    if (translation && translation !== userMessage) {
+      // Afficher la traduction
+      const result = `>>> ZORO: ${translation}`;
+      setMessages((prev) => [...prev, { type: "zoro", text: result }]);
+    } else if (translation === userMessage) {
+      // Texte identique (pas de traduction)
       setMessages((prev) => [
         ...prev,
         {
           type: "zoro",
-          text: `zoro: [ERREUR] ${errorMsg}`,
+          text: `>>> ZORO: [Aucune traduction nécessaire]`,
         },
       ]);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  } catch (err) {
+    // Erreur
+    const errorMsg = err instanceof Error ? err.message : "Impossible de traduire";
+    setError(errorMsg);
+    setMessages((prev) => [
+      ...prev,
+      {
+        type: "zoro",
+        text: `>>> ZORO: [ERREUR] ${errorMsg}`,
+      },
+    ]);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleDisconnect = () => {
     const confirmed = window.confirm(MESSAGES.TRANSLATOR.CONFIRM_LOGOUT);
@@ -148,7 +144,6 @@ export default function TranslatorPage() {
     }
   };
 
-  // ✅ CORRECTION: Afficher loading screen pendant la vérification
   if (isChecking) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
@@ -159,16 +154,15 @@ export default function TranslatorPage() {
     );
   }
 
-  // Si pas authentifié, ne pas afficher (la redirection est en cours)
   if (!isAuthenticated) {
     return null;
   }
 
   return (
-    <>
-      <div className="terminal-line">
-        zoro v2.47 | {direction} | User: {username}
-      </div>
+  <>
+    <div className="terminal-line">
+      zoro v2.47 | {direction} | {username.toUpperCase()}
+    </div>
 
       {error && (
         <div
