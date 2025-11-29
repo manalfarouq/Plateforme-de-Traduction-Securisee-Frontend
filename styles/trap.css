@@ -17,15 +17,26 @@
   max-width: 500px;
   width: 100%;
   text-align: center;
-  animation: microGlitch 0.1s infinite;
+  /* ✅ CORRECTION: Supprimer l'animation permanente */
+}
+
+/* ✅ CORRECTION: Animation glitch UNIQUEMENT quand .glitch-active */
+.trap-page-content.glitch-active {
+  animation: microGlitch 0.1s 2;
 }
 
 @keyframes microGlitch {
   0%, 100% {
-    transform: translateY(0);
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-2px, 2px);
   }
   50% {
-    transform: translateY(1px);
+    transform: translate(2px, -2px);
+  }
+  75% {
+    transform: translate(-2px, -2px);
   }
 }
 

@@ -20,15 +20,13 @@ export default function TrapPage({ onStart }: TrapPageProps) {
   const [pixelPos, setPixelPos] = useState<PixelPos | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
-  // useLayoutEffect s'exécute AVANT le paint
-  // setState ici est nécessaire pour éviter hydration mismatch// eslint-disable-next-line react-hooks/exhaustive-deps
   useLayoutEffect(() => {
-    // Générer la position aléatoire UNIQUEMENT côté client
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPixelPos({
       left: Math.random() * 80 + 10,
       top: Math.random() * 80 + 10,
     });
-
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
   }, []);
 
@@ -74,11 +72,10 @@ export default function TrapPage({ onStart }: TrapPageProps) {
     setText(e.target.value);
   };
 
-  // Ne pas afficher le pixel tant qu'on n'est pas hydraté
   if (!isMounted || !pixelPos) {
     return (
       <div className="trap-page-container">
-        <div className={`trap-page-content ${hasGlitch ? "glitch-active" : ""}`}>
+        <div className="trap-page-content">
           <h1 className="trap-title">{MESSAGES.TRAP_PAGE.TITLE}</h1>
           <p className="trap-subtitle">{MESSAGES.TRAP_PAGE.SUBTITLE}</p>
 
