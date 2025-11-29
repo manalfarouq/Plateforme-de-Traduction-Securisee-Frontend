@@ -1,7 +1,8 @@
 // ===== API SERVICE =====
 // CORRECTION: Centraliser tous les appels API pour éviter la répétition
 
-const API_URL = "http://localhost:8000";
+// ✅ MODIFIÉ: Utiliser la variable d'environnement avec fallback vers Render
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://zorohack.onrender.com";
 
 export const apiService = {
   // ✅ LOGIN
@@ -68,12 +69,14 @@ export const apiService = {
         role: role.trim(),
         admin_code: adminCode ? "[HIDDEN]" : "[NON FOURNI]"
       });
+      
       interface SignupBody {
         username: string;
         password: string;
         role: string;
         admin_code?: string;
       }
+      
       const body: SignupBody = {
         username: username.trim(),
         password: password.trim(),
