@@ -350,3 +350,131 @@
   animation: blink 1s infinite steps(1); 
   margin-left: 2px;
 }
+
+/* ===== AFFICHAGE BASE DE DONNÉES ===== */
+.db-list-container {
+  margin-top: 10px;
+  padding: 10px 0;
+  border: 1px solid var(--color-primary);
+  border-radius: 3px;
+  padding: 15px;
+  background-color: rgba(0, 255, 0, 0.05);
+}
+
+.db-title {
+  color: #ffff00; /* Jaune pour le titre */
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.db-separator {
+  color: var(--color-primary);
+  opacity: 0.8;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.user-data {
+  color: var(--color-primary); /* Vert par défaut */
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre; /* Important pour l'alignement des espaces */
+}
+
+.admin-role {
+  color: #ff00ff !important; /* Magenta pour les admins */
+}
+
+.db-return-btn {
+  margin-top: 15px;
+  font-size: 12px;
+}
+
+@keyframes border-drawing {
+  0% {
+    clip-path: inset(0 100% 100% 0); /* Commence à 0% du haut à gauche */
+  }
+  25% {
+    clip-path: inset(0 0 100% 0); /* Dessine le haut */
+  }
+  50% {
+    clip-path: inset(0 0 0 0); /* Dessine le côté droit et le bas */
+  }
+  75% {
+    clip-path: inset(0 0 0 0); /* Dessine le côté gauche */
+  }
+  100% {
+    clip-path: inset(0 0 0 0); /* Bordure complète */
+  }
+}
+
+/* MODIFICATION/AJOUT pour le conteneur BDD */
+.db-list-container {
+  margin-top: 10px;
+  padding: 15px;
+  border: 1px solid var(--color-primary);
+  border-radius: 3px;
+  background-color: rgba(0, 255, 0, 0.05);
+  position: relative;
+  /* Masque tout au début */
+  opacity: 0; 
+  animation: fadeIn 0.5s ease-in forwards; 
+}
+
+/* NOUVEAU: Classe pour l'animation de dessin de la bordure */
+.db-draw-border {
+  /* Assurez-vous que l'élément a la bordure */
+  border: 1px solid var(--color-primary);
+  animation: border-drawing 1.5s linear forwards; 
+  clip-path: inset(0 100% 100% 0); /* Initialisation du clip */
+  /* Laisser le fond apparaître avant la bordure */
+  animation-delay: 0.3s; 
+}
+
+.db-title-container {
+  /* Pour s'assurer que le titre s'affiche au-dessus */
+  z-index: 10;
+}
+
+.db-title {
+  color: #ffff00; 
+  font-weight: bold;
+  text-align: left; /* Aligné à gauche pour l'effet machine à écrire */
+  margin-bottom: 5px;
+  font-family: var(--font-mono);
+}
+
+/* Animation fadeIn */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.db-list-container {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #00ff00;
+  border-radius: 3px;
+  background-color: rgba(0, 255, 0, 0.05);
+}
+
+.db-border {
+  color: #ffff00;
+  text-align: center;
+  font-family: monospace;
+}
+
+.db-title {
+  color: #ffff00;
+  text-align: center;
+  font-weight: bold;
+  font-family: monospace;
+}
+
