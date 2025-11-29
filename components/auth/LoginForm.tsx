@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MESSAGES } from "@/lib/constants";
+import { apiService } from "@/lib/apiService";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -26,42 +27,20 @@ export default function LoginForm() {
     }
 
     try {
-      // CONFIGURATION API
-      const API_URL = "http://localhost:8000";
-
-      // APPEL API
-      const response = await fetch(`${API_URL}/login/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: username.trim(),
-          password: password.trim(),
-        }),
-      });
-
-      // PARSING RÉPONSE
-      const data = await response.json();
-
-      // VÉRIFIER STATUS
-      if (!response.ok) {
-        throw new Error(data.detail || data.message || "Erreur de connexion");
-      }
+      const data = await apiService.login(username, password);
 
       // SUCCÈS - SAUVEGARDER TOKEN
       localStorage.setItem("token", data.token || data.access_token);
       localStorage.setItem("username", username);
       localStorage.setItem("user_session", JSON.stringify({ username }));
+      localStorage.setItem("isAuthenticated", "true");
 
       setSuccess(true);
 
-      // REDIRECTION
       setTimeout(() => {
         router.push("/translator");
-      }, 1000);
+      }, 500);
     } catch (err) {
-      // GESTION ERREUR
       const errorMessage = err instanceof Error ? err.message : "Une erreur est survenue";
       setError(errorMessage);
       console.error("Erreur login:", err);

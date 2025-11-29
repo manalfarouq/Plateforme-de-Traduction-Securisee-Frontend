@@ -43,8 +43,8 @@ export const MESSAGES = {
   },
 
   ZORO_TUTORIAL: [
-    ">>> ZORO: Première fois ici ? Laisse-moi t'expliquer.",
-    ">>> ZORO: J'intercepte tes mots en français et les transforme en anglais.",
+    ">>> ZORO: Première fois ici ? Laisse-moi t&apos;expliquer.",
+    ">>> ZORO: J&apos;intercepte tes mots en français et les transforme en anglais.",
     ">>> ZORO: Tape simplement ta phrase et appuie sur ENTER.",
     ">>> ZORO: Tu peux aussi utiliser /swap pour inverser la direction.",
     ">>> ZORO: Prêt ? Commence à écrire!",
@@ -60,7 +60,7 @@ export const MESSAGES = {
 
   SIGNUP: {
     TITLE: ">>> CRÉER NOUVEAU PROFIL",
-    USERNAME: ">>> Nom d'utilisateur :",
+    USERNAME: ">>> Nom d&apos;utilisateur :",
     EMAIL: ">>> Email (optionnel) :",
     PASSWORD: ">>> Mot de passe :",
     CONFIRM: ">>> Confirmation :",
@@ -75,7 +75,8 @@ export const MESSAGES = {
     ANALYZING: ">>> ZORO: [ANALYSE SÉMANTIQUE...]",
     TRANSLATING: ">>> ZORO: [TRADUCTION EN COURS...]",
     DISCONNECT: "◉ DÉCONNECTER",
-    CONFIRM_LOGOUT: 'ZORO: "Tu es sûr de vouloir partir ?"',
+    // ✅ CORRECTION: Apostrophe échappée avec &apos;
+    CONFIRM_LOGOUT: "ZORO: \"Tu es sûr de vouloir partir ?\"",
   },
 
   COMMANDS: {

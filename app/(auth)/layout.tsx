@@ -10,7 +10,8 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   const [easterEgg, setEasterEgg] = useState<string | null>(null);
-  // Initialiser directement avec getCurrentUsername (safe car exécuté côté client)
+  
+  // Initialiser avec le username actuel
   const [username, setUsername] = useState<string>(() => {
     if (typeof window !== "undefined") {
       return getCurrentUsername();
@@ -18,26 +19,43 @@ export default function AuthLayout({
     return "GUEST_1337";
   });
 
+  // Vérifier si l'utilisateur est vraiment connecté
+  const [isConnected, setIsConnected] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const auth = localStorage.getItem("isAuthenticated");
+      return auth === "true";
+    }
+    return false;
+  });
+
   useEffect(() => {
-    // Écouter les changements de localStorage
+    // Écouter les changements de localStorage (autres onglets)
     const handleStorageChange = () => {
-      setUsername(getCurrentUsername());
+      const newUsername = getCurrentUsername();
+      const auth = localStorage.getItem("isAuthenticated") === "true";
+      setUsername(newUsername);
+      setIsConnected(auth);
     };
 
+    // Vérifier le username et le statut de connexion
+    const checkUsername = () => {
+      const currentUsername = getCurrentUsername();
+      const auth = localStorage.getItem("isAuthenticated") === "true";
+      setUsername(currentUsername);
+      setIsConnected(auth);
+    };
+
+    // Vérifier immédiatement au montage
+    checkUsername();
+
+    // Vérifier toutes les 500ms pour les changements locaux
+    const interval = setInterval(checkUsername, 500);
+
     window.addEventListener("storage", handleStorageChange);
-    
-    // Vérifier aussi toutes les 2 secondes (au cas où le storage change dans la même page)
-    const checkInterval = setInterval(() => {
-      const currentUser = getCurrentUsername();
-      setUsername((prev) => {
-        // Ne mettre à jour que si différent pour éviter les re-renders inutiles
-        return prev !== currentUser ? currentUser : prev;
-      });
-    }, 2000);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
-      clearInterval(checkInterval);
+      clearInterval(interval);
     };
   }, []);
 
@@ -61,11 +79,21 @@ export default function AuthLayout({
     <div className="terminal-layout">
       <header className="terminal-header">
         <span className="terminal-status">
-          {MESSAGES.TERMINAL.HEADER_STATUS}
+          {/* Vide à gauche ou tu peux mettre quelque chose */}
         </span>
-        <span className="terminal-user">
-          {MESSAGES.TERMINAL.getHeaderUser(username)}
-        </span>
+        
+        {/* ✅ Afficher à DROITE */}
+        {!isConnected && (
+          <span className="terminal-user">
+            STATUS: DISCONNECTED
+          </span>
+        )}
+        
+        {isConnected && (
+          <span className="terminal-user">
+            USER: {username.toUpperCase()} | STATUS: CONNECTED
+          </span>
+        )}
       </header>
 
       {easterEgg && <div className="easter-egg">{easterEgg}</div>}

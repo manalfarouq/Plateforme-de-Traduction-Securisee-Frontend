@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MESSAGES, TIMINGS } from "@/lib/constants";
+import { apiService } from "@/lib/apiService"; // ✅ CORRECTION: Utiliser le service centralisé
+import { useAuth } from "@/hooks/useAuth"; // ✅ CORRECTION: Utiliser le hook centralisé
 
 interface Message {
   type: "user" | "zoro";
@@ -11,32 +13,28 @@ interface Message {
 
 export default function TranslatorPage() {
   const router = useRouter();
+  
+  // ✅ CORRECTION: Utiliser le hook useAuth au lieu de faire la vérif ici
+  const { username, isChecking, isAuthenticated } = useAuth();
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [username, setUsername] = useState("");
   const [direction, setDirection] = useState<"FR->EN" | "EN->FR">("FR->EN");
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // ✅ CORRECTION: Vérifier l'authentification et rediriger si nécessaire
   useEffect(() => {
-    // Récupérer le username depuis localStorage
-    const session = localStorage.getItem("user_session");
-    if (session) {
-      try {
-        const user = JSON.parse(session);
-        setUsername(user.username);
-      } catch {
-        router.push("/login");
-        return;
-      }
-    } else {
-      router.push("/login");
+    if (isChecking) return; // Attendre la fin de la vérification
+
+    if (!isAuthenticated) {
+      router.push("/login"); // Rediriger si pas authentifié
       return;
     }
 
-    setIsInitialized(true);
-  }, [router]);
+    setIsInitialized(true); // On peut afficher le contenu
+  }, [isChecking, isAuthenticated, router]);
 
   // Afficher le tutoriel quand initialisé
   useEffect(() => {
@@ -52,77 +50,7 @@ export default function TranslatorPage() {
     tutorial();
   }, [isInitialized]);
 
-  // FONCTION: Appeler l'API de traduction
-  const translateText = async (text: string, dir: "FR->EN" | "EN->FR") => {
-    try {
-      setError(null);
-
-      // CONFIGURATION API
-      const API_URL = "http://localhost:8000";
-      const token = localStorage.getItem("token");
-
-      // CONSTRUIRE L'URL SELON LA DIRECTION
-      const urlPath = dir === "FR->EN" ? "fr-en" : "en-fr";
-      const endpoint = `${API_URL}/traduction/traduire/${urlPath}`;
-
-      console.log("URL appelée:", endpoint);
-      console.log("Token:", token ? "✓ présent" : "✗ manquant");
-      console.log("Texte envoyé:", text.trim());
-
-      // APPEL API
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "token": token || "",
-        },
-        body: JSON.stringify({
-          text: text.trim(),
-          source_language: dir === "FR->EN" ? "fr" : "en",
-          target_language: dir === "FR->EN" ? "en" : "fr"
-        }),
-      });
-
-      console.log("Status:", response.status);
-      console.log("Headers:", response.headers);
-
-      // Lire la réponse en tant que texte d'abord
-      const responseText = await response.text();
-      console.log("Réponse brute:", responseText);
-
-      // Tenter de parser en JSON
-      let data;
-      try {
-        data = JSON.parse(responseText);
-        console.log("Réponse JSON:", data);
-      } catch (parseError) {
-        console.error("Impossible de parser JSON:", parseError);
-        throw new Error(`Réponse invalide du serveur: ${responseText.substring(0, 100)}`);
-      }
-
-      // VÉRIFIER STATUS
-      if (!response.ok) {
-        const errorMsg = data.detail 
-          ? (Array.isArray(data.detail) 
-              ? JSON.stringify(data.detail, null, 2) 
-              : data.detail)
-          : data.message || JSON.stringify(data);
-        console.error("Erreur API détaillée:", errorMsg);
-        throw new Error(errorMsg);
-      }
-
-      // RETOURNER LE TEXTE TRADUIT
-      const result = data.translated_text || data.translated || data.translation || data.result || text;
-      console.log("Traduction réussie:", result);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : JSON.stringify(err);
-      setError(errorMessage);
-      console.error("Erreur complète:", err);
-      return null;
-    }
-  };
-
+  // ✅ CORRECTION: Utiliser le service API centralisé
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -164,7 +92,7 @@ export default function TranslatorPage() {
       return;
     }
 
-    // Appeler la vraie API de traduction
+    // Appeler la traduction
     setIsLoading(true);
 
     // Afficher "Analyse sémantique"
@@ -175,34 +103,38 @@ export default function TranslatorPage() {
 
     await new Promise((r) => setTimeout(r, 500));
 
-    // Appeler l'API
-    const translation = await translateText(userMessage, direction);
+    try {
+      // ✅ CORRECTION: Utiliser le service API centralisé
+      const translation = await apiService.translate(userMessage, direction);
 
-    if (translation && translation !== userMessage) {
-      // Afficher la traduction
-      const result = `zoro: ${translation}`;
-      setMessages((prev) => [...prev, { type: "zoro", text: result }]);
-    } else if (!translation) {
+      if (translation && translation !== userMessage) {
+        // Afficher la traduction
+        const result = `zoro: ${translation}`;
+        setMessages((prev) => [...prev, { type: "zoro", text: result }]);
+      } else if (translation === userMessage) {
+        // Texte identique (pas de traduction)
+        setMessages((prev) => [
+          ...prev,
+          {
+            type: "zoro",
+            text: `zoro: [Aucune traduction nécessaire]`,
+          },
+        ]);
+      }
+    } catch (err) {
       // Erreur
+      const errorMsg = err instanceof Error ? err.message : "Impossible de traduire";
+      setError(errorMsg);
       setMessages((prev) => [
         ...prev,
         {
           type: "zoro",
-          text: `zoro: [ERREUR] ${error || "Impossible de traduire"}`,
+          text: `zoro: [ERREUR] ${errorMsg}`,
         },
       ]);
-    } else {
-      // Texte identique (pas de traduction)
-      setMessages((prev) => [
-        ...prev,
-        {
-          type: "zoro",
-          text: `zoro: [Aucune traduction nécessaire]`,
-        },
-      ]);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handleDisconnect = () => {
@@ -211,9 +143,26 @@ export default function TranslatorPage() {
       localStorage.removeItem("user_session");
       localStorage.removeItem("token");
       localStorage.removeItem("username");
+      localStorage.removeItem("isAuthenticated");
       router.push("/");
     }
   };
+
+  // ✅ CORRECTION: Afficher loading screen pendant la vérification
+  if (isChecking) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
+        <div className="terminal-line" style={{ animation: "blink 1s infinite" }}>
+          INITIALISATION...
+        </div>
+      </div>
+    );
+  }
+
+  // Si pas authentifié, ne pas afficher (la redirection est en cours)
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <>
