@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import { MESSAGES } from "@/lib/constants";
 import { apiService } from "@/lib/apiService";
 
+const ADMIN_CODE = "2480"; // Code admin secret
+
 export default function SignupForm() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [adminCode, setAdminCode] = useState(""); // ← Nouveau champ
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -34,8 +37,8 @@ export default function SignupForm() {
       return;
     }
 
-    if (password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères");
+    if (password.length < 4) {
+      setError("Le mot de passe doit contenir au moins 4 caractères");
       setIsLoading(false);
       return;
     }
@@ -46,15 +49,22 @@ export default function SignupForm() {
       return;
     }
 
+    // ✅ NOUVEAU: Vérifier le code admin si role === "admin"
+    if (role === "admin" && adminCode !== ADMIN_CODE) {
+      setError("Code admin incorrect");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const data = await apiService.signup(username, password, role);
+      const data = await apiService.signup(username, password, role, adminCode);
 
       // SUCCÈS - SAUVEGARDER TOKEN
       if (data.token || data.access_token) {
         localStorage.setItem("token", data.token || data.access_token);
       }
       localStorage.setItem("username", username);
-      localStorage.setItem("user_session", JSON.stringify({ username }));
+      localStorage.setItem("user_session", JSON.stringify({ username, role })); // ← Sauvegarder role
       localStorage.setItem("isAuthenticated", "true");
 
       setSuccess(true);
@@ -125,11 +135,25 @@ export default function SignupForm() {
             <input
               type="text"
               value={role}
-              onChange={(e) => setRole(e.target.value)}
+              onChange={(e) => setRole(e.target.value.toLowerCase())} // Force lowercase
               placeholder="ex : user/admin"
               disabled={isLoading}
             />
           </div>
+
+          {/* ✅ NOUVEAU: Afficher le champ adminCode seulement si role === "admin" */}
+          {role === "admin" && (
+            <div className="terminal-form-group">
+              <label>{">>>> Code Admin :"}</label>
+              <input
+                type="password"
+                value={adminCode}
+                onChange={(e) => setAdminCode(e.target.value)}
+                placeholder="Entrez le code admin..."
+                disabled={isLoading}
+              />
+            </div>
+          )}
 
           {error && <div className="terminal-error">{error}</div>}
 

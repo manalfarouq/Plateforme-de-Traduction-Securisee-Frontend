@@ -59,7 +59,7 @@ export const MESSAGES = {
 
   SIGNUP: {
     TITLE: ">>> CRÉER NOUVEAU PROFIL",
-    USERNAME: ">>> Nom d&apos;utilisateur :",
+    USERNAME: ">>> Nom d'utilisateur :",
     EMAIL: ">>> Email (optionnel) :",
     PASSWORD: ">>> Mot de passe :",
     CONFIRM: ">>> Confirmation :",
