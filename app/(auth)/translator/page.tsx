@@ -16,13 +16,14 @@ export default function TranslatorPage() {
   const router = useRouter();
   const { username, isChecking, isAuthenticated } = useAuth();
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messagesQueue, setMessagesQueue] = useState<Message[]>([]);
+  const [currentMessage, setCurrentMessage] = useState<Message | null>(null);
+  const [displayedMessages, setDisplayedMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [direction, setDirection] = useState<"FR->EN" | "EN->FR">("FR->EN");
   const [error, setError] = useState<string | null>(null);
 
-  // Tutoriel : compteur pour suivre le nombre de messages affichés
   const [initializedMessagesCount, setInitializedMessagesCount] = useState(0);
 
   useEffect(() => {
@@ -36,12 +37,23 @@ export default function TranslatorPage() {
 
   const isTutorialFinished = initializedMessagesCount >= MESSAGES.ZORO_TUTORIAL.length;
 
-  // --- Avancer le tutoriel ---
   const advanceTutorial = useCallback(() => {
     setInitializedMessagesCount((prev) => prev + 1);
   }, []);
 
-  // --- Gestion de la soumission ---
+  const enqueueMessage = (msg: Message) => {
+    setMessagesQueue((prev) => [...prev, msg]);
+  };
+
+  // --- Affichage séquentiel ---
+  useEffect(() => {
+    if (!currentMessage && messagesQueue.length > 0) {
+      const [next, ...rest] = messagesQueue;
+      setCurrentMessage(next);
+      setMessagesQueue(rest);
+    }
+  }, [currentMessage, messagesQueue]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -49,67 +61,46 @@ export default function TranslatorPage() {
     const userMessage = input.trim();
     setInput("");
 
-    // Ajouter le message utilisateur avec animation
-    setMessages((prev) => [
-      ...prev,
-      { type: "user", text: `> ${username.toUpperCase()}: ${userMessage}` },
-    ]);
+    enqueueMessage({ type: "user", text: `> ${username.toUpperCase()}: ${userMessage}` });
 
     // Commandes spéciales
     if (userMessage === "/swap") {
       const newDirection = direction === "FR->EN" ? "EN->FR" : "FR->EN";
       setDirection(newDirection);
-      setMessages((prev) => [
-        ...prev,
-        { type: "zoro", text: `>>> ZORO: [MODE INVERSÉ: ${newDirection}]` },
-      ]);
+      enqueueMessage({ type: "zoro", text: `>>> ZORO: [MODE INVERSÉ: ${newDirection}]` });
       return;
     }
-
     if (userMessage === "/clear") {
-      setMessages([]);
+      setMessagesQueue([]);
+      setDisplayedMessages([]);
+      setCurrentMessage(null);
       return;
     }
-
     if (userMessage === "/help") {
-      setMessages((prev) => [
-        ...prev,
-        {
-          type: "zoro",
-          text: ">>> ZORO: Commandes: /swap (inverser) | /clear (effacer) | /help (aide)",
-        },
-      ]);
+      enqueueMessage({
+        type: "zoro",
+        text: ">>> ZORO: Commandes: /swap (inverser) | /clear (effacer) | /help (aide)",
+      });
       return;
     }
 
-    // Appel API traduction
     setIsLoading(true);
-    setMessages((prev) => [
-      ...prev,
-      { type: "zoro", text: ">>> ZORO: [ANALYSE SÉMANTIQUE...]" },
-    ]);
+    enqueueMessage({ type: "zoro", text: ">>> ZORO: [ANALYSE SÉMANTIQUE...]" });
     await new Promise((r) => setTimeout(r, 500));
 
     try {
       const translation = await apiService.translate(userMessage, direction);
-      if (translation && translation !== userMessage) {
-        setMessages((prev) => [
-          ...prev,
-          { type: "zoro", text: `>>> ZORO: ${translation}` },
-        ]);
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          { type: "zoro", text: `>>> ZORO: [Aucune traduction nécessaire]` },
-        ]);
-      }
+      enqueueMessage({
+        type: "zoro",
+        text:
+          translation && translation !== userMessage
+            ? `>>> ZORO: ${translation}`
+            : `>>> ZORO: [Aucune traduction nécessaire]`,
+      });
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Impossible de traduire";
       setError(errorMsg);
-      setMessages((prev) => [
-        ...prev,
-        { type: "zoro", text: `>>> ZORO: [ERREUR] ${errorMsg}` },
-      ]);
+      enqueueMessage({ type: "zoro", text: `>>> ZORO: [ERREUR] ${errorMsg}` });
     } finally {
       setIsLoading(false);
     }
@@ -165,16 +156,25 @@ export default function TranslatorPage() {
           />
         )}
 
-        {/* Messages utilisateur et traductions avec animation */}
-        {isTutorialFinished &&
-          messages.map((msg, idx) => (
-            <TypewriterLine
-              key={`msg-${idx}`}
-              text={msg.text}
-              delay={0}
-              className={msg.type === "zoro" ? "zoro" : ""}
-            />
-          ))}
+        {/* Messages animés utilisateur et Zoro */}
+        {displayedMessages.map((msg, idx) => (
+          <div key={`disp-${idx}`} className={`terminal-line ${msg.type === "zoro" ? "zoro" : ""}`}>
+            {msg.text}
+          </div>
+        ))}
+
+        {currentMessage && (
+          <TypewriterLine
+            key={currentMessage.text + Math.random()}
+            text={currentMessage.text}
+            delay={0}
+            className={currentMessage.type === "zoro" ? "zoro" : ""}
+            onComplete={() => {
+              setDisplayedMessages((prev) => [...prev, currentMessage]);
+              setCurrentMessage(null);
+            }}
+          />
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="terminal-input-group">
