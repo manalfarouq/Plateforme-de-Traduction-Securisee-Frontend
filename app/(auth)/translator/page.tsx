@@ -102,7 +102,6 @@ export default function TranslatorPage() {
     setAnimatedUserLines((prev) => [...prev, line]);
   }, []);
 
-  // ✅ Correction : le header n'utilise pas users[0], et user=null pour le header
   const currentUserLineToAnimate = useMemo(() => {
     if (!showUserList || users.length === 0 || animatedUserIndex < 0) return null;
     if (animatedUserIndex === 0) return formatUserLine(null, true); // header
@@ -126,6 +125,7 @@ export default function TranslatorPage() {
 
     enqueueMessage({ type: "user", text: `> ${username.toUpperCase()}: ${userMessage}` });
 
+    // ✅ COMMANDE /users ou /admin
     if (userMessage === "/users" || userMessage === "/admin") {
       if (userRole !== "admin") {
         enqueueMessage({
@@ -161,6 +161,61 @@ export default function TranslatorPage() {
         setIsLoading(false);
       }
       return;
+    }
+
+    // ✅ COMMANDE /swap
+    if (userMessage === "/swap") {
+      const newDirection = direction === "FR->EN" ? "EN->FR" : "FR->EN";
+      setDirection(newDirection);
+      enqueueMessage({
+        type: "zoro",
+        text: `>>> ZORO: Direction changée vers ${newDirection}`,
+      });
+      return;
+    }
+
+    // ✅ COMMANDE /clear
+    if (userMessage === "/clear") {
+      setMessagesQueue([]);
+      setDisplayedMessages([]);
+      setCurrentMessage(null);
+      enqueueMessage({
+        type: "zoro",
+        text: ">>> ZORO: Conversation effacée.",
+      });
+      return;
+    }
+
+    // ✅ COMMANDE /help
+    if (userMessage === "/help") {
+      const helpText = userRole === "admin"
+        ? ">>> ZORO: Commandes: /swap (changer direction) | /clear (effacer) | /users (liste utilisateurs) | /help (aide)"
+        : ">>> ZORO: Commandes: /swap (changer direction) | /clear (effacer) | /help (aide)";
+      
+      enqueueMessage({
+        type: "zoro",
+        text: helpText,
+      });
+      return;
+    }
+
+    // ✅ TRADUCTION (si ce n'est pas une commande)
+    setIsLoading(true);
+    try {
+      const translation = await apiService.translate(userMessage, direction);
+      enqueueMessage({
+        type: "zoro",
+        text: `>>> ZORO: ${translation}`,
+      });
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Erreur de traduction";
+      setError(errorMsg);
+      enqueueMessage({
+        type: "zoro",
+        text: `>>> ZORO: [ERREUR] ${errorMsg}`,
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -301,7 +356,6 @@ export default function TranslatorPage() {
               </div>
             )}
 
-            {/* Bouton qui n’apparaît qu’après que toutes les lignes sont animées */}
             {animatedUserIndex > users.length && (
               <button
                 onClick={() => {
