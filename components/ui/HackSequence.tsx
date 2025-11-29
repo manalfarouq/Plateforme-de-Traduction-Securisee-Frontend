@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "@/styles/hack-sequence.css";
 
 interface HackSequenceProps {
@@ -10,35 +10,54 @@ interface HackSequenceProps {
 
 type HackPhase = "idle" | "shake" | "glitch" | "black" | "code" | "scanlines" | "complete";
 
+// ✅ Générer les valeurs aléatoires
+const generateRandomIP = () =>
+  `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
+
+const generateRandomHash = () =>
+  Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+
+const generateRandomGPS = () => {
+  const lat = (Math.random() * 180 - 90).toFixed(4);
+  const lon = (Math.random() * 360 - 180).toFixed(4);
+  return `${lat}, ${lon}`;
+};
+
+// ✅ GLOBAL: Clé unique pour chaque session de hack
+let currentHackSessionId = 0;
+
 export default function HackSequence({ isActive, onComplete }: HackSequenceProps) {
   const [displayText, setDisplayText] = useState("");
   const [phase, setPhase] = useState<HackPhase>("idle");
   const [progress, setProgress] = useState(0);
-
-  // Générer une adresse IP aléatoire
-  const generateRandomIP = () => {
-    return `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
-  };
-
-  // Générer un hash aléatoire
-  const generateRandomHash = () => {
-    return Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
-  };
-
-  // Générer des coordonnées GPS fictives
-  const generateRandomGPS = () => {
-    const lat = (Math.random() * 180 - 90).toFixed(4);
-    const lon = (Math.random() * 360 - 180).toFixed(4);
-    return `${lat}, ${lon}`;
-  };
+  
+  const onCompleteRef = useRef(onComplete);
+  const sequenceRef = useRef<string[] | null>(null);
+  const currentSessionRef = useRef<number>(-1);
+  
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive) {
+      // ✅ Réinitialisation asynchrone
+      const id = setTimeout(() => {
+        setDisplayText("");
+        setPhase("idle");
+        setProgress(0);
+      }, 0);
+      return () => clearTimeout(id);
+    }
 
-    let textIndex = 0;
-    let timeoutId: NodeJS.Timeout;
+    // ✅ Créer une nouvelle session à chaque fois que isActive devient true
+    const newSessionId = ++currentHackSessionId;
+    currentSessionRef.current = newSessionId;
+    
+    console.log(`▶️ Starting hack sequence (session ${newSessionId})`);
 
-    const fullSequence = [
+    // ✅ Créer la séquence
+    sequenceRef.current = [
       "INITIALISATION...",
       "CONNEXION AU NŒUD PRINCIPAL...",
       `IP LOCAL: ${generateRandomIP()}`,
@@ -50,15 +69,17 @@ export default function HackSequence({ isActive, onComplete }: HackSequenceProps
       "SYSTÈME LANCÉ",
     ];
 
+    let textIndex = 0;
+    let timeoutId: NodeJS.Timeout;
+
     interface PhaseTimeline {
       phase: HackPhase;
       duration: number;
     }
 
-    // J'ai rétabli ici la durée courte du glitch original (phase 2) car il n'y a plus de gros texte à lire.
     const phaseTimeline: PhaseTimeline[] = [
       { phase: "shake", duration: 200 },
-      { phase: "glitch", duration: 300 }, // Raccourci car plus de texte à afficher
+      { phase: "glitch", duration: 300 },
       { phase: "black", duration: 200 },
       { phase: "code", duration: 3000 },
       { phase: "scanlines", duration: 1000 },
@@ -69,14 +90,23 @@ export default function HackSequence({ isActive, onComplete }: HackSequenceProps
 
     const executePhase = (phaseInfo: PhaseTimeline) => {
       timeoutId = setTimeout(() => {
+        // ✅ Vérifier que c'est toujours la bonne session
+        if (currentSessionRef.current !== newSessionId) {
+          console.log(`⏭️ Session ${newSessionId} cancelled, skipping phase`);
+          return;
+        }
+
         setPhase(phaseInfo.phase);
 
         if (phaseInfo.phase === "code") {
           const addText = () => {
-            if (textIndex < fullSequence.length) {
-              setDisplayText((prev) => prev + fullSequence[textIndex] + "\n");
+            // ✅ Vérifier encore avant d'ajouter du texte
+            if (currentSessionRef.current !== newSessionId) return;
+
+            if (textIndex < sequenceRef.current!.length) {
+              setDisplayText((prev) => prev + sequenceRef.current![textIndex] + "\n");
               textIndex += 1;
-              const progressPercent = (textIndex / fullSequence.length) * 100;
+              const progressPercent = (textIndex / sequenceRef.current!.length) * 100;
               setProgress(progressPercent);
               timeoutId = setTimeout(addText, 300);
             }
@@ -84,38 +114,36 @@ export default function HackSequence({ isActive, onComplete }: HackSequenceProps
           addText();
         } else if (phaseInfo.phase === "complete") {
           setProgress(100);
-          timeoutId = setTimeout(onComplete, 1000);
+          timeoutId = setTimeout(() => {
+            // ✅ Appeler onComplete seulement si c'est la bonne session
+            if (currentSessionRef.current === newSessionId) {
+              console.log(`✅ Hack complete (session ${newSessionId}) - calling onComplete`);
+              onCompleteRef.current();
+            }
+          }, 1000);
         }
       }, currentTime);
 
       currentTime += phaseInfo.duration;
     };
 
-    phaseTimeline.forEach((phaseInfo) => {
-      executePhase(phaseInfo);
-    });
+    phaseTimeline.forEach(executePhase);
 
-    return () => clearTimeout(timeoutId);
-  }, [isActive, onComplete]);
+    return () => {
+      console.log(`🧹 Cleanup (session ${newSessionId})`);
+      clearTimeout(timeoutId);
+    };
+  }, [isActive]);
 
   if (!isActive) return null;
 
   return (
     <div className={`hack-sequence hack-phase-${phase}`}>
-      
-      {/* SCANLINES (Toujours visible pour l'effet rétro) */}
       <div className="scanlines" />
 
-      {/* --- PHASE 1 & 2: LE GROS GLITCH RETIRÉ --- */}
-      {/* Le conteneur glitch-title-container a été supprimé ici 
-        pour ne plus afficher le texte "SYSTEM FAILURE" / "GLITCH".
-      */}
-
-      {/* --- PHASE 4: LE CODE TERMINAL --- */}
       {phase === "code" && (
         <div className="hack-content">
           <pre className="hack-text">{displayText}</pre>
-
           <div className="loading-bar">
             <div className="loading-bar-fill" style={{ width: `${progress}%` }} />
             <span className="loading-percentage">{Math.round(progress)}%</span>
@@ -123,7 +151,6 @@ export default function HackSequence({ isActive, onComplete }: HackSequenceProps
         </div>
       )}
 
-      {/* --- PHASE FINALE: TUNNEL --- */}
       {phase === "complete" && <div className="tunnel-zoom" />}
     </div>
   );
