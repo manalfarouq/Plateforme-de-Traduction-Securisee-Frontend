@@ -49,7 +49,7 @@ export default function SignupForm() {
       return;
     }
 
-    // ✅ NOUVEAU: Vérifier le code admin si role === "admin"
+    // Vérifier le code admin si role === "admin"
     if (role === "admin" && adminCode !== ADMIN_CODE) {
       setError("Code admin incorrect");
       setIsLoading(false);
@@ -141,7 +141,7 @@ export default function SignupForm() {
             />
           </div>
 
-          {/* ✅ NOUVEAU: Afficher le champ adminCode seulement si role === "admin" */}
+          {/* Afficher le champ adminCode seulement si role === "admin" */}
           {role === "admin" && (
             <div className="terminal-form-group">
               <label>{">>>> Code Admin :"}</label>

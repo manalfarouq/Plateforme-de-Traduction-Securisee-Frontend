@@ -29,11 +29,11 @@ export default function LoginForm() {
     try {
       const data = await apiService.login(username, password);
 
-      // ✅ MODIFIÉ: Sauvegarder TOKEN + USERNAME + ROLE
+      // Sauvegarder TOKEN + USERNAME + ROLE
       localStorage.setItem("token", data.token || data.access_token);
       localStorage.setItem("username", username);
       
-      // ✅ AJOUTER le role dans user_session
+      // AJOUTER le role dans user_session
       localStorage.setItem("user_session", JSON.stringify({ 
         username, 
         role: data.role || "user" // ← NOUVEAU: Récupérer le role depuis l'API

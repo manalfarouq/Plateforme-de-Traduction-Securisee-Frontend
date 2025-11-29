@@ -1,11 +1,10 @@
 // ===== API SERVICE =====
-// CORRECTION: Centraliser tous les appels API pour éviter la répétition
 
-// ✅ MODIFIÉ: Utiliser la variable d'environnement avec fallback vers Render
+// Utiliser la variable d'environnement avec fallback vers Render
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://zorohack.onrender.com";
 
 export const apiService = {
-  // ✅ LOGIN
+  // LOGIN
   async login(username: string, password: string) {
     try {
       const endpoint = `${API_URL}/login/login`;
@@ -56,7 +55,7 @@ export const apiService = {
     }
   },
 
-  // ✅ SIGNUP - CORRIGÉ: Accepte maintenant admin_code
+  // SIGNUP -  Accepte maintenant admin_code
   async signup(username: string, password: string, role: string, adminCode?: string) {
     try {
       const endpoint = `${API_URL}/register/register`;
@@ -83,7 +82,7 @@ export const apiService = {
         role: role.trim(),
       };
 
-      // ✅ AJOUTER le code admin si fourni
+      // AJOUTER le code admin si fourni
       if (adminCode) {
         body.admin_code = adminCode;
       }
@@ -128,7 +127,7 @@ export const apiService = {
     }
   },
 
-  // ✅ TRANSLATE
+  // TRANSLATE
   async translate(text: string, dir: "FR->EN" | "EN->FR") {
     try {
       const token = localStorage.getItem("token");
@@ -189,7 +188,7 @@ export const apiService = {
     }
   },
 
-   // ✅ GET ALL USERS (ADMIN ONLY)
+   // GET ALL USERS (ADMIN ONLY)
   async getAllUsers() {
     try {
       const token = localStorage.getItem("token");
