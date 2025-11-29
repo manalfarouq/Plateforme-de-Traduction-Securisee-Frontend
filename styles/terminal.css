@@ -262,3 +262,91 @@
     font-size: 10px;
   }
 }
+
+
+/* ===== ANIMATIONS GLOBALES (vérifiez que celle-ci existe bien dans globals.css ou terminal.css) ===== */
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+/* ===== TERMINAL LINE (MODIFICATION) ===== */
+.terminal-line {
+  color: var(--color-primary);
+  line-height: 1.8;
+  margin: 5px 0;
+  word-break: break-word;
+  /* L'ancienne animation 'typewriter' a été retirée d'ici */
+}
+
+/* NOUVELLE CLASSE POUR L'EFFET MACHINE À ÉCRIRE */
+.terminal-line.typewriter-effect {
+  overflow: hidden; /* Cache le texte qui n'est pas encore écrit */
+  white-space: nowrap; /* Force le texte à rester sur une seule ligne */
+  width: 0; /* Commence avec une largeur de 0 */
+  
+  /* L'animation est appliquée ici pour la durée correcte */
+  animation: 
+    typewriter steps(50, end) forwards, /* steps(N, end) où N est le nombre max de caractères */
+    cursor-blink 0.75s step-end infinite; /* Simule le curseur du terminal */
+}
+
+/* Le curseur clignotant est déplacé dans le composant TypewriterLine */
+.cursor-blink {
+  display: inline-block;
+  width: 7px; /* Largeur pour un meilleur visuel */
+  height: 1em;
+  background-color: var(--color-primary);
+  animation: blink 1s infinite steps(1); /* Utilise l'animation blink existante */
+  margin-left: 2px;
+}
+
+/* Retirer le clignotement pour le curseur une fois l'écriture terminée (dans le JS) 
+   -> Nous gérons le curseur manuellement dans le composant TypewriterLine.
+*/
+
+/* ... (Gardez vos styles existants) ... */
+
+/* ===== ANIMATIONS GLOBALES ===== */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.3; }
+}
+
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+
+
+/* ===== TERMINAL LINE (Modification) ===== */
+.terminal-line {
+  color: var(--color-primary);
+  line-height: 1.8;
+  margin: 5px 0;
+  word-break: break-word;
+}
+
+/* NOUVELLE CLASSE POUR L'EFFET MACHINE À ÉCRIRE */
+.terminal-line.typewriter-effect {
+  overflow: hidden; 
+  white-space: nowrap; 
+  width: 0; 
+  display: inline-block; /* Important pour que l'animation de width fonctionne */
+  
+  /* Utilise steps(50, end) pour l'effet de frappe saccadée (terminal) */
+  animation: 
+    typewriter steps(50, end) forwards; 
+}
+
+/* Curseur clignotant */
+.cursor-blink {
+  display: inline-block;
+  width: 7px; /* Largeur visible */
+  height: 1em;
+  background-color: var(--color-primary);
+  /* Animation de clignotement pour le curseur */
+  animation: blink 1s infinite steps(1); 
+  margin-left: 2px;
+}
