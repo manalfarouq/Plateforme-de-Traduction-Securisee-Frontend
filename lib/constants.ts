@@ -26,7 +26,6 @@ export const MESSAGES = {
     "LOCALISATION: [GÉNÉRÉ]",
     "ACCÈS ACCORDÉ",
     "SYSTÈME LANCÉ",
-    "INITIALISATION SYSTÈME: [████████████] 100%",
   ],
 
   TERMINAL: {
@@ -37,7 +36,7 @@ export const MESSAGES = {
       return `User: ${user.toUpperCase()} | Status: CONNECTED`;
     },
     SYSTEM_V1: ">>> SYSTÈME DE TRADUCTION QUANTIQUE v2.47",
-    SYSTEM_V2: ">>> Alimenté par IA Horizon-7",
+    SYSTEM_V2: ">>> Alimenté par M A N A L",
     ZORO_WELCOME: ">>> Bienvenue, utilisateur.",
     ZORO_AI: ">>> Je suis ZORO, une intelligence de traduction du futur.",
   },
