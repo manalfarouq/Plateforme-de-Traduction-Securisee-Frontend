@@ -51,7 +51,8 @@ export default function TranslatorPage() {
 
   const [animatedUserIndex, setAnimatedUserIndex] = useState(-1); 
   const [animatedUserLines, setAnimatedUserLines] = useState<string[]>([]); 
-  const [titleAnimationFinished, setTitleAnimationFinished] = useState(false); 
+  const [titleAnimationFinished, setTitleAnimationFinished] = useState(false);
+  const [showReturnButton, setShowReturnButton] = useState(false); // NOUVEAU
 
   useEffect(() => {
     if (isChecking) return;
@@ -94,7 +95,13 @@ export default function TranslatorPage() {
     setAnimatedUserIndex((prev) => {
       const nextIndex = prev + 1;
       const totalLines = users.length + 1;
-      return nextIndex <= totalLines ? nextIndex : totalLines;
+      
+      // NOUVEAU: Afficher le bouton quand on arrive à la dernière ligne
+      if (nextIndex >= totalLines) {
+        setTimeout(() => setShowReturnButton(true), 100);
+      }
+      
+      return nextIndex;
     });
   }, [users.length]);
 
@@ -107,8 +114,14 @@ export default function TranslatorPage() {
     if (animatedUserIndex === 0) return formatUserLine(null, true);
     if (animatedUserIndex > 0 && animatedUserIndex <= users.length)
       return formatUserLine(users[animatedUserIndex - 1]);
+    
+    // Si on a fini toutes les lignes, afficher le bouton
+    if (animatedUserIndex > users.length && !showReturnButton) {
+      setTimeout(() => setShowReturnButton(true), 100);
+    }
+    
     return null;
-  }, [animatedUserIndex, showUserList, users]);
+  }, [animatedUserIndex, showUserList, users, showReturnButton]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,6 +135,7 @@ export default function TranslatorPage() {
     setAnimatedUserIndex(-1);
     setAnimatedUserLines([]);
     setTitleAnimationFinished(false);
+    setShowReturnButton(false); // NOUVEAU: Réinitialiser le bouton
 
     enqueueMessage({ type: "user", text: `> ${username.toUpperCase()}: ${userMessage}` });
 
@@ -229,9 +243,21 @@ export default function TranslatorPage() {
     }
   };
 
+  const handleReturnToTranslator = () => {
+    setShowUserList(false);
+    setUsers([]);
+    setAnimatedUserIndex(-1);
+    setAnimatedUserLines([]);
+    setTitleAnimationFinished(false);
+    setShowReturnButton(false);
+    setMessagesQueue([]);
+    setDisplayedMessages([]);
+    setCurrentMessage(null);
+  };
+
   return (
     <>
-      {/* ✅ Info de direction et role - Le header user est dans le layout */}
+      {/* Info de direction et role */}
       <div className="terminal-line" style={{ marginBottom: "15px" }}>
         <span style={{ color: "#00ffff", fontWeight: "600" }}>
           ▸ Mode: {direction}
@@ -350,21 +376,17 @@ export default function TranslatorPage() {
               </div>
             )}
 
-            {animatedUserIndex > users.length && (
+            {/* NOUVEAU: Le bouton reste visible une fois affiché */}
+            {showReturnButton && (
               <button
-                onClick={() => {
-                  setShowUserList(false);
-                  setUsers([]);
-                  setAnimatedUserIndex(-1);
-                  setAnimatedUserLines([]);
-                  setTitleAnimationFinished(false);
-                  setMessagesQueue([]);
-                  setDisplayedMessages([]);
-                  setCurrentMessage(null);
-                }}
+                onClick={handleReturnToTranslator}
                 className="terminal-button db-return-btn"
+                style={{
+                  position: "relative",
+                  zIndex: 100
+                }}
               >
-                ← Retour au traducteur
+                ← RETOUR AU TRADUCTEUR
               </button>
             )}
           </div>
@@ -384,7 +406,7 @@ export default function TranslatorPage() {
             />
           </form>
 
-          <div style={{ fontSize: "12px", marginTop: "10px", opacity: 0.7, color: "#00ff00" }}>
+          <div className="terminal-footer-status">
             {userRole === "admin" 
               ? "Commandes: /swap /clear /users /help | Status: " 
               : "Commandes: /swap /clear /help | Status: "}
