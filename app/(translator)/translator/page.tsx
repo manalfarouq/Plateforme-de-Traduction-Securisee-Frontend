@@ -320,18 +320,18 @@ export default function TranslatorPage() {
           <div className="db-list-container">
             <div className="db-title-animated">
               <TypewriterLine
-                text="┌─────────────────────────────────────────────┐"
+                text="***********************************************"
                 delay={0}
                 className="db-border"
               />
               <TypewriterLine
-                text="│ BASE DE DONNÉES - UTILISATEURS ENREGISTRÉS │"
-                delay={800}
+                text=" BASE DE DONNÉES - UTILISATEURS ENREGISTRÉS "
+                delay={2430}
                 className="db-title"
               />
               <TypewriterLine
-                text="└─────────────────────────────────────────────┘"
-                delay={1600}
+                text="***********************************************"
+                delay={5100}
                 className="db-border"
                 onComplete={() => {
                   setTitleAnimationFinished(true);

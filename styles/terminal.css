@@ -69,16 +69,16 @@
 /* Container pour la page translator (plein écran) */
 .terminal-main.fullscreen {
   max-width: none;
-  height: calc(100vh - 60px); /* Hauteur moins le header */
+  height: calc(100vh - 60px);
   border-radius: 0;
   border: none;
   border-top: 2px solid #00ff00;
   display: flex;
   flex-direction: column;
   padding: 20px;
-  padding-bottom: 14px; /* Espace pour le footer et l'input (augmenté) */
+  padding-bottom: 14px;
   background-color: rgba(0, 0, 0, 0.95);
-  overflow: hidden; /* Pas de scroll sur le container principal */
+  overflow: hidden;
 }
 
 /* =========================================
@@ -342,6 +342,29 @@
   }
 }
 
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Animation typewriter pour l'effet lettre par lettre */
+@keyframes typewriter {
+  from { 
+    width: 0;
+  }
+  to { 
+    width: 100%;
+  }
+}
+
+.typewriter-effect {
+  overflow: hidden;
+  white-space: nowrap;
+  display: inline-block;
+  animation: typewriter linear forwards;
+  border-right: 0;
+}
+
 /* =========================================
    DISCONNECT BUTTON & FOOTER STATUS
 ========================================= */
@@ -372,7 +395,6 @@
   transform: translateY(-2px);
 }
 
-/* Status bar en bas */
 .terminal-footer-status {
   position: fixed;
   bottom: 20px;
@@ -398,90 +420,6 @@
   z-index: 1000;
   animation: fadeIn 0.5s ease, fadeOut 0.5s ease 3.5s;
   pointer-events: none;
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-/* =========================================
-   RESPONSIVE
-========================================= */
-/* Scrollbar personnalisée pour la zone de messages */
-.terminal-main.fullscreen > div:first-child {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 255, 0, 0.3) transparent;
-}
-
-.terminal-main.fullscreen > div:first-child::-webkit-scrollbar {
-  width: 6px;
-}
-
-.terminal-main.fullscreen > div:first-child::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.terminal-main.fullscreen > div:first-child::-webkit-scrollbar-thumb {
-  background: rgba(0, 255, 0, 0.3);
-  border-radius: 3px;
-}
-
-.terminal-main.fullscreen > div:first-child::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 255, 0, 0.5);
-}
-
-@media (max-width: 768px) {
-  .terminal-main {
-    max-width: 90%;
-    padding: 25px;
-  }
-  
-  .terminal-header {
-    font-size: 10px;
-    padding: 6px 10px;
-  }
-  
-  .terminal-form-group label {
-    font-size: 11px;
-  }
-  
-  .terminal-form-group input {
-    padding: 10px 12px;
-    font-size: 12px;
-  }
-  
-  .terminal-button {
-    padding: 12px 16px;
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .terminal-layout {
-    padding: 15px;
-  }
-  
-  .terminal-main {
-    max-width: 100%;
-    padding: 20px;
-  }
-  
-  .terminal-header {
-    position: relative;
-    top: 0;
-    left: 0;
-    right: 0;
-    margin-bottom: 20px;
-    font-size: 9px;
-  }
-  
-  .disconnect-btn {
-    bottom: 15px;
-    right: 15px;
-    padding: 8px 14px;
-    font-size: 10px;
-  }
 }
 
 /* =========================================
@@ -533,13 +471,11 @@
   text-shadow: 0 0 3px rgba(0, 255, 0, 0.3);
 }
 
-/* Ligne admin en magenta */
 .user-data.admin-role {
   color: #ff00ff !important;
   text-shadow: 0 0 5px rgba(255, 0, 255, 0.5);
 }
 
-/* Total utilisateurs en cyan */
 .db-total-info {
   color: #00ffff;
   text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
@@ -547,7 +483,6 @@
   font-size: 12px;
 }
 
-/* Bouton retour BDD */
 .db-return-btn {
   border-color: #ffff00 !important;
   color: #ffff00 !important;
@@ -591,7 +526,6 @@
   -moz-box-shadow: none !important;
 }
 
-/* Supprimer TOUS les états possibles du form */
 .terminal-input-group:hover,
 .terminal-input-group:focus,
 .terminal-input-group:active,
@@ -644,7 +578,6 @@
   font-style: italic;
 }
 
-/* Tous les états de l'input - OVERRIDE globals.css */
 .terminal-input-group input:hover,
 .terminal-input-group input:focus,
 .terminal-input-group input:active,
@@ -661,28 +594,77 @@
 /* =========================================
    SCROLLBAR HIDDEN & GLOBAL OVERFLOW
 ========================================= */
-
-/* Cacher complètement la scrollbar */
 .terminal-main.fullscreen > div:first-of-type {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .terminal-main.fullscreen > div:first-of-type::-webkit-scrollbar {
-  display: none; /* Chrome/Safari/Opera */
+  display: none;
   width: 0;
   height: 0;
 }
 
-/* Style global body pour éviter les scrollbars */
 body {
   overflow: hidden !important;
 }
 
-/* Override overflow sur layout fullscreen */
 .terminal-layout.fullscreen {
   overflow: hidden !important;
 }
 
+/* =========================================
+   RESPONSIVE
+========================================= */
+@media (max-width: 768px) {
+  .terminal-main {
+    max-width: 90%;
+    padding: 25px;
+  }
+  
+  .terminal-header {
+    font-size: 10px;
+    padding: 6px 10px;
+  }
+  
+  .terminal-form-group label {
+    font-size: 11px;
+  }
+  
+  .terminal-form-group input {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  
+  .terminal-button {
+    padding: 12px 16px;
+    font-size: 12px;
+  }
+}
 
-
+@media (max-width: 480px) {
+  .terminal-layout {
+    padding: 15px;
+  }
+  
+  .terminal-main {
+    max-width: 100%;
+    padding: 20px;
+  }
+  
+  .terminal-header {
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin-bottom: 20px;
+    font-size: 9px;
+  }
+  
+  .disconnect-btn {
+    bottom: 15px;
+    right: 15px;
+    padding: 8px 14px;
+    font-size: 10px;
+  }
+}
