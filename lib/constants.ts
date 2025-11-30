@@ -74,7 +74,6 @@ export const MESSAGES = {
     ANALYZING: ">>> ZORO: [ANALYSE SÉMANTIQUE...]",
     TRANSLATING: ">>> ZORO: [TRADUCTION EN COURS...]",
     DISCONNECT: "◉ DÉCONNECTER",
-    // ✅ CORRECTION: Apostrophe échappée avec &apos;
     CONFIRM_LOGOUT: "ZORO: \"Tu es sûr de vouloir partir ?\"",
   },
 

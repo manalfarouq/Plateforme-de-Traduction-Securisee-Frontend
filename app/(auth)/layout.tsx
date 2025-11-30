@@ -11,7 +11,6 @@ export default function AuthLayout({
 }) {
   const [easterEgg, setEasterEgg] = useState<string | null>(null);
   
-  // Initialiser avec le username actuel
   const [username, setUsername] = useState<string>(() => {
     if (typeof window !== "undefined") {
       return getCurrentUsername();
@@ -19,7 +18,6 @@ export default function AuthLayout({
     return "GUEST_1337";
   });
 
-  // Vérifier si l'utilisateur est vraiment connecté
   const [isConnected, setIsConnected] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
       const auth = localStorage.getItem("isAuthenticated");
@@ -29,7 +27,6 @@ export default function AuthLayout({
   });
 
   useEffect(() => {
-    // Écouter les changements de localStorage (autres onglets)
     const handleStorageChange = () => {
       const newUsername = getCurrentUsername();
       const auth = localStorage.getItem("isAuthenticated") === "true";
@@ -37,7 +34,6 @@ export default function AuthLayout({
       setIsConnected(auth);
     };
 
-    // Vérifier le username et le statut de connexion
     const checkUsername = () => {
       const currentUsername = getCurrentUsername();
       const auth = localStorage.getItem("isAuthenticated") === "true";
@@ -45,12 +41,8 @@ export default function AuthLayout({
       setIsConnected(auth);
     };
 
-    // Vérifier immédiatement au montage
     checkUsername();
-
-    // Vérifier toutes les 500ms pour les changements locaux
     const interval = setInterval(checkUsername, 500);
-
     window.addEventListener("storage", handleStorageChange);
 
     return () => {
@@ -60,14 +52,11 @@ export default function AuthLayout({
   }, []);
 
   useEffect(() => {
-    // Afficher un easter egg aléatoire toutes les 30 secondes
     const interval = setInterval(() => {
-      if (Math.random() < 0.3) { // 30% de chance
+      if (Math.random() < 0.3) {
         const eggs = MESSAGES.EASTER_EGGS;
         const egg = eggs[Math.floor(Math.random() * eggs.length)];
         setEasterEgg(egg);
-
-        // Disparaître après 4 secondes
         setTimeout(() => setEasterEgg(null), 4000);
       }
     }, 30000);
@@ -76,15 +65,14 @@ export default function AuthLayout({
   }, []);
 
   return (
-    <div className="terminal-layout">
+    <div className="terminal-layout"> {/* MODE CENTRÉ */}
       <header className="terminal-header">
         <span className="terminal-status">
-          {/* Vide à gauche ou tu peux mettre quelque chose */}
+          zoro v2.47
         </span>
         
-        {/* ✅ Afficher à DROITE */}
         {!isConnected && (
-          <span className="terminal-user">
+          <span className="terminal-user disconnected">
             STATUS: DISCONNECTED
           </span>
         )}
@@ -98,7 +86,7 @@ export default function AuthLayout({
 
       {easterEgg && <div className="easter-egg">{easterEgg}</div>}
 
-      <main className="terminal-main">{children}</main>
+      <main className="terminal-main">{children}</main> {/* MODE COMPACT */}
     </div>
   );
 }

@@ -93,7 +93,7 @@ export default function TranslatorPage() {
   const advanceUserAnimation = useCallback(() => {
     setAnimatedUserIndex((prev) => {
       const nextIndex = prev + 1;
-      const totalLines = users.length + 1; // +1 pour l'en-tête
+      const totalLines = users.length + 1;
       return nextIndex <= totalLines ? nextIndex : totalLines;
     });
   }, [users.length]);
@@ -104,9 +104,9 @@ export default function TranslatorPage() {
 
   const currentUserLineToAnimate = useMemo(() => {
     if (!showUserList || users.length === 0 || animatedUserIndex < 0) return null;
-    if (animatedUserIndex === 0) return formatUserLine(null, true); // header
+    if (animatedUserIndex === 0) return formatUserLine(null, true);
     if (animatedUserIndex > 0 && animatedUserIndex <= users.length)
-      return formatUserLine(users[animatedUserIndex - 1]); // lignes utilisateurs
+      return formatUserLine(users[animatedUserIndex - 1]);
     return null;
   }, [animatedUserIndex, showUserList, users]);
 
@@ -125,7 +125,7 @@ export default function TranslatorPage() {
 
     enqueueMessage({ type: "user", text: `> ${username.toUpperCase()}: ${userMessage}` });
 
-    // ✅ COMMANDE /users ou /admin
+    // COMMANDE /users ou /admin
     if (userMessage === "/users" || userMessage === "/admin") {
       if (userRole !== "admin") {
         enqueueMessage({
@@ -163,7 +163,7 @@ export default function TranslatorPage() {
       return;
     }
 
-    // ✅ COMMANDE /swap
+    // COMMANDE /swap
     if (userMessage === "/swap") {
       const newDirection = direction === "FR->EN" ? "EN->FR" : "FR->EN";
       setDirection(newDirection);
@@ -174,7 +174,7 @@ export default function TranslatorPage() {
       return;
     }
 
-    // ✅ COMMANDE /clear
+    // COMMANDE /clear
     if (userMessage === "/clear") {
       setMessagesQueue([]);
       setDisplayedMessages([]);
@@ -186,7 +186,7 @@ export default function TranslatorPage() {
       return;
     }
 
-    // ✅ COMMANDE /help
+    // COMMANDE /help
     if (userMessage === "/help") {
       const helpText = userRole === "admin"
         ? ">>> ZORO: Commandes: /swap (changer direction) | /clear (effacer) | /users (liste utilisateurs) | /help (aide)"
@@ -199,7 +199,7 @@ export default function TranslatorPage() {
       return;
     }
 
-    // ✅ TRADUCTION (si ce n'est pas une commande)
+    // TRADUCTION
     setIsLoading(true);
     try {
       const translation = await apiService.translate(userMessage, direction);
@@ -231,27 +231,21 @@ export default function TranslatorPage() {
 
   return (
     <>
-      <div className="terminal-line">
-        zoro v2.47 | {direction} | {username?.toUpperCase()}
+      {/* ✅ Info de direction et role - Le header user est dans le layout */}
+      <div className="terminal-line" style={{ marginBottom: "15px" }}>
+        <span style={{ color: "#00ffff", fontWeight: "600" }}>
+          ▸ Mode: {direction}
+        </span>
         {userRole === "admin" && (
-          <span style={{ color: "#ff00ff", marginLeft: "10px" }}>
-            [ADMIN]
+          <span style={{ color: "#ff00ff", marginLeft: "20px", fontWeight: "600" }}>
+            ● ADMIN ACCESS GRANTED
           </span>
         )}
       </div>
 
       {error && (
-        <div
-          style={{
-            color: "#ff6b6b",
-            marginTop: "10px",
-            padding: "10px",
-            border: "1px solid #ff6b6b",
-            borderRadius: "3px",
-            fontSize: "12px",
-          }}
-        >
-          Erreur: {error}
+        <div className="terminal-error">
+          ⚠ Erreur: {error}
         </div>
       )}
 
@@ -369,7 +363,6 @@ export default function TranslatorPage() {
                   setCurrentMessage(null);
                 }}
                 className="terminal-button db-return-btn"
-                style={{ marginTop: "15px" }}
               >
                 ← Retour au traducteur
               </button>
@@ -391,11 +384,13 @@ export default function TranslatorPage() {
             />
           </form>
 
-          <div style={{ fontSize: "12px", marginTop: "10px", opacity: 0.7 }}>
+          <div style={{ fontSize: "12px", marginTop: "10px", opacity: 0.7, color: "#00ff00" }}>
             {userRole === "admin" 
               ? "Commandes: /swap /clear /users /help | Status: " 
               : "Commandes: /swap /clear /help | Status: "}
-            {isLoading ? "Traitement..." : "Prêt"}
+            <span style={{ color: isLoading ? "#ffff00" : "#00ffff" }}>
+              {isLoading ? "⟳ Traitement..." : "✓ Prêt"}
+            </span>
           </div>
 
           <button
