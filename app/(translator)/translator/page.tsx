@@ -320,7 +320,7 @@ export default function TranslatorPage() {
           <div className="db-list-container">
             <div className="db-title-animated">
               <TypewriterLine
-                text="***********************************************"
+                text="================================================="
                 delay={0}
                 className="db-border"
               />
@@ -330,7 +330,7 @@ export default function TranslatorPage() {
                 className="db-title"
               />
               <TypewriterLine
-                text="***********************************************"
+                text=""
                 delay={5100}
                 className="db-border"
                 onComplete={() => {
