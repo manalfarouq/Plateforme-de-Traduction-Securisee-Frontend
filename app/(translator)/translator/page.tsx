@@ -275,7 +275,7 @@ export default function TranslatorPage() {
         </div>
       )}
 
-      <div style={{ marginTop: "20px", flexGrow: 1, overflow: "auto" }}>
+      <div style={{ marginTop: "20px", flexGrow: 1, overflow: "auto", display: "flex", flexDirection: "column", alignItems: showUserList ? "center" : "flex-start" }}>
         
         {!showUserList && (
           <>
@@ -341,7 +341,7 @@ export default function TranslatorPage() {
             </div>
 
             {titleAnimationFinished && (
-              <div style={{ marginTop: "15px" }}>
+              <div style={{ marginTop: "15px", width: "100%" }}>
                 {animatedUserLines.map((line, idx) => (
                   <div
                     key={`user-line-${idx}`}
@@ -349,6 +349,7 @@ export default function TranslatorPage() {
                     style={{
                       color: line.includes("ADMIN") ? "#ff00ff" : "#00ff00",
                       whiteSpace: "pre",
+                      textAlign: "center",
                     }}
                   >
                     {line}
