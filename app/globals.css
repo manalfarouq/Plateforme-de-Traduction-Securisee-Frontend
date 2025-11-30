@@ -8,19 +8,33 @@
 }
 
 :root {
-  /* Couleurs */
-  --color-primary: #00ff00;
-  --color-primary-dark: #00cc00;
-  --color-bg-dark: #000000;
-  --color-bg-light: #ffffff;
-  --color-text-dark: #00ff00;
-  --color-border: #00ff00;
-  --color-glitch-1: #ff00ff;
-  --color-glitch-2: #00ffff;
+  /* Couleurs principales */
+  --color-primary: #00ff00;        /* Vert - Terminal principal */
+  --color-primary-dark: #00cc00;   /* Vert foncé */
+  --color-bg-dark: #000000;        /* Noir - Fond terminal */
+  --color-bg-light: #ffffff;       /* Blanc - Fond trap page */
+  --color-text-dark: #00ff00;      /* Vert - Texte terminal */
+  --color-border: #00ff00;         /* Vert - Bordures */
+  
+  /* Couleurs fonctionnelles */
+  --color-warning: #ffff00;        /* Jaune - Titres spéciaux, BDD */
+  --color-error: #ff0000;          /* Rouge - Erreurs */
+  --color-accent: #ff00ff;         /* Magenta - Admin, highlights */
+  --color-info: #00ffff;           /* Cyan - Infos secondaires */
+  
+  /* Couleurs supplémentaires */
+  --color-glitch-1: #ff00ff;       /* Magenta - Effets glitch */
+  --color-glitch-2: #00ffff;       /* Cyan - Effets glitch */
+  --color-white: #ffffff;
+  --color-grey: #808080;           /* Gris - Texte secondaire */
 
   /* Shadows & Glows */
   --glow-green: 0 0 10px rgba(0, 255, 0, 0.5);
   --glow-green-intense: 0 0 20px rgba(0, 255, 0, 0.8);
+  --glow-yellow: 0 0 10px rgba(255, 255, 0, 0.5);
+  --glow-red: 0 0 10px rgba(255, 0, 0, 0.5);
+  --glow-cyan: 0 0 10px rgba(0, 255, 255, 0.5);
+  --glow-magenta: 0 0 10px rgba(255, 0, 255, 0.5);
 
   /* Fonts */
   --font-mono: "Courier New", Courier, monospace;
@@ -39,6 +53,22 @@ body {
   color: #333;
   transition: background-color 0.3s ease;
 }
+
+/* ===== CLASSES UTILITAIRES DE COULEUR ===== */
+.color-primary { color: var(--color-primary); }
+.color-warning { color: var(--color-warning); }
+.color-error { color: var(--color-error); }
+.color-accent { color: var(--color-accent); }
+.color-info { color: var(--color-info); }
+.color-white { color: var(--color-white); }
+.color-grey { color: var(--color-grey); }
+
+/* Effets de glow */
+.glow-green { text-shadow: var(--glow-green); }
+.glow-yellow { text-shadow: var(--glow-yellow); }
+.glow-red { text-shadow: var(--glow-red); }
+.glow-cyan { text-shadow: var(--glow-cyan); }
+.glow-magenta { text-shadow: var(--glow-magenta); }
 
 /* ===== ANIMATIONS GLOBALES ===== */
 @keyframes blink {
@@ -64,8 +94,8 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeOut {
@@ -108,8 +138,13 @@ body {
 
 /* ===== FOCUS STYLES ===== */
 button:focus-visible,
-input:focus-visible,
 textarea:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Sauf pour les inputs du terminal */
+input:focus-visible:not(.terminal-input-group input) {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }

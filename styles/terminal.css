@@ -1,480 +1,688 @@
-/* ===== TERMINAL LAYOUT ===== */
+/* =========================================
+   ROOT VARIABLES (Héritées de globals.css)
+========================================= */
+
+/* =========================================
+   TERMINAL LAYOUT - COMPACT & CENTERED
+========================================= */
 .terminal-layout {
-  width: 100%;
+  width: 100vw;
   min-height: 100vh;
-  background-color: var(--color-bg-dark);
-  color: var(--color-primary);
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  color: #00ff00;
   font-family: var(--font-mono);
   display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
 }
 
-/* ===== TERMINAL HEADER ===== */
+/* Layout pour la page translator (plein écran) */
+.terminal-layout.fullscreen {
+  display: block;
+  padding: 0;
+  align-items: stretch;
+}
+
+/* Effet de grille matrix en arrière-plan */
+.terminal-layout::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  animation: gridScroll 20s linear infinite;
+}
+
+@keyframes gridScroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(50px); }
+}
+
+/* =========================================
+   CONTAINER CENTRAL COMPACT
+========================================= */
+.terminal-main {
+  width: 100%;
+  max-width: 500px;
+  background-color: rgba(0, 0, 0, 0.85);
+  border: 2px solid #00ff00;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 
+    0 0 20px rgba(0, 255, 0, 0.3),
+    0 0 40px rgba(0, 255, 0, 0.1),
+    inset 0 0 60px rgba(0, 255, 0, 0.05);
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(10px);
+}
+
+/* Container pour la page translator (plein écran) */
+.terminal-main.fullscreen {
+  max-width: none;
+  height: calc(100vh - 60px); /* Hauteur moins le header */
+  border-radius: 0;
+  border: none;
+  border-top: 2px solid #00ff00;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  padding-bottom: 14px; /* Espace pour le footer et l'input (augmenté) */
+  background-color: rgba(0, 0, 0, 0.95);
+  overflow: hidden; /* Pas de scroll sur le container principal */
+}
+
+/* =========================================
+   HEADER - PLUS DISCRET
+========================================= */
 .terminal-header {
-  border-bottom: 1px solid var(--color-primary);
-  padding: 12px 15px;
-  background-color: #0a0a0a;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+  font-size: 11px;
+  color: rgba(0, 255, 0, 0.6);
+  z-index: 2;
+  padding: 8px 12px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 255, 0, 0.3);
+  border-radius: 4px;
+  backdrop-filter: blur(5px);
+}
+
+/* Header pour la page translator (fixe en haut) */
+.terminal-layout.fullscreen .terminal-header {
+  position: relative;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0 0 20px 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 1px solid #00ff00;
+  border-radius: 0;
+  padding: 12px 20px;
+  font-size: 12px;
 }
 
 .terminal-status {
-  color: var(--color-primary);
-  font-weight: 500;
-  text-shadow: 0 0 5px var(--color-primary);
+  color: #00ff00;
+  font-weight: 600;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
 }
 
 .terminal-user {
-  color: var(--color-primary);
-  opacity: 0.8;
+  color: #00ffff;
+  opacity: 0.9;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
 }
 
-/* ===== TERMINAL MAIN ===== */
-.terminal-main {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
+.terminal-user.disconnected {
+  color: #888;
+  opacity: 0.6;
+  text-shadow: none;
+}
+
+/* =========================================
+   TERMINAL LINES
+========================================= */
+.terminal-line {
+  color: #00ff00;
+  line-height: 1.8;
+  margin: 8px 0;
+  font-size: 14px;
+  text-shadow: 0 0 3px rgba(0, 255, 0, 0.3);
+}
+
+/* =========================================
+   FORMS - STYLE MODERNE
+========================================= */
+.terminal-form {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
-/* ===== TERMINAL INPUT ===== */
-.terminal-input-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 20px;
-  border-top: 1px solid var(--color-primary);
-  padding-top: 15px;
+.terminal-form-group {
+  margin-bottom: 18px;
 }
 
-.terminal-input-group::before {
-  content: "> ";
-  color: var(--color-primary);
-  font-weight: bold;
-  min-width: 20px;
+.terminal-form-group label {
+  display: block;
+  color: #00ff00;
+  font-size: 12px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.4);
 }
 
-.terminal-input-group input {
-  flex: 1;
-  background-color: transparent;
-  border: none;
-  color: var(--color-primary);
+.terminal-form-group input {
+  width: 100%;
+  background-color: rgba(0, 20, 0, 0.4);
+  border: 1px solid rgba(0, 255, 0, 0.4);
+  color: #00ff00;
+  padding: 12px 15px;
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 13px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.terminal-form-group input:focus {
   outline: none;
+  border-color: #00ff00;
+  background-color: rgba(0, 40, 0, 0.5);
+  box-shadow: 
+    0 0 10px rgba(0, 255, 0, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.terminal-input-group input::placeholder {
-  color: rgba(0, 255, 0, 0.5);
+.terminal-form-group input::placeholder {
+  color: rgba(0, 255, 0, 0.4);
+  font-style: italic;
 }
 
-/* ===== TERMINAL LINE ===== */
-.terminal-line {
-  color: var(--color-primary);
-  line-height: 1.8;
-  margin: 5px 0;
-  word-break: break-word;
-  animation: typewriter 0.05s steps(1);
-}
-
-.terminal-line.babel {
-  color: var(--color-primary);
-  text-shadow: 0 0 5px var(--color-primary);
-}
-
-/* ===== BLINKING CURSOR ===== */
-.cursor-blink {
-  display: inline-block;
-  width: 2px;
-  height: 1em;
-  background-color: var(--color-primary);
-  animation: blink 1s infinite;
-  margin-left: 2px;
-}
-
-/* ===== BUTTON TERMINAL ===== */
+/* =========================================
+   BUTTONS - STYLE MODERNE
+========================================= */
 .terminal-button {
-  background-color: transparent;
-  border: 1px solid var(--color-primary);
-  color: var(--color-primary);
-  padding: 10px 20px;
-  border-radius: 3px;
+  width: 100%;
+  background: linear-gradient(135deg, rgba(0, 255, 0, 0.1) 0%, rgba(0, 255, 0, 0.05) 100%);
+  border: 2px solid #00ff00;
+  color: #00ff00;
+  padding: 14px 20px;
+  border-radius: 6px;
   cursor: pointer;
   font-family: var(--font-mono);
   font-size: 13px;
-  transition: all 0.3s ease;
+  font-weight: 700;
   text-transform: uppercase;
-  font-weight: 500;
-  margin-top: 15px;
-  display: inline-block;
+  letter-spacing: 2px;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.terminal-button::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(0, 255, 0, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.terminal-button:hover::before {
+  width: 300px;
+  height: 300px;
 }
 
 .terminal-button:hover {
-  background-color: var(--color-primary);
-  color: var(--color-bg-dark);
-  box-shadow: 0 0 10px var(--color-primary);
+  background: #00ff00;
+  color: #000;
+  box-shadow: 
+    0 0 20px rgba(0, 255, 0, 0.6),
+    0 0 40px rgba(0, 255, 0, 0.3);
+  transform: translateY(-2px);
 }
 
 .terminal-button:active {
-  transform: scale(0.95);
+  transform: translateY(0);
 }
 
 .terminal-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background: rgba(0, 255, 0, 0.05);
 }
 
-/* ===== TERMINAL FORM ===== */
-.terminal-form {
-  display: flex;
-  flex-direction: column;
+.terminal-button:disabled:hover {
+  transform: none;
+  box-shadow: none;
+  background: rgba(0, 255, 0, 0.05);
+  color: #00ff00;
 }
 
-.terminal-form-group {
-  margin-bottom: 15px;
+/* =========================================
+   LINKS
+========================================= */
+.terminal-form a {
+  color: #00ffff;
+  text-decoration: none;
+  font-size: 12px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  margin-top: 15px;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
 }
 
-.terminal-form-group label {
-  display: block;
-  color: var(--color-primary);
-  font-size: 13px;
-  margin-bottom: 5px;
+.terminal-form a:hover {
+  color: #00ff00;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+  transform: translateX(5px);
 }
 
-.terminal-form-group input {
-  background-color: rgba(0, 255, 0, 0.05);
-  border: 1px solid var(--color-primary);
-  color: var(--color-primary);
-  padding: 8px 10px;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  border-radius: 2px;
-}
-
-.terminal-form-group input:focus {
-  outline: none;
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-  background-color: rgba(0, 255, 0, 0.1);
-}
-
-.terminal-form-group input::placeholder {
-  color: rgba(0, 255, 0, 0.5);
-}
-
-/* ===== TERMINAL ERROR ===== */
+/* =========================================
+   ERRORS & SUCCESS
+========================================= */
 .terminal-error {
-  color: #ff6b6b;
-  font-size: 13px;
-  margin-top: 8px;
-  text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+  color: #ff3333;
+  font-size: 12px;
+  margin-top: 10px;
+  padding: 12px 15px;
+  border: 1px solid rgba(255, 51, 51, 0.5);
+  border-radius: 4px;
+  background-color: rgba(255, 0, 0, 0.1);
+  text-shadow: 0 0 5px rgba(255, 51, 51, 0.3);
+  animation: shakeError 0.5s ease;
 }
 
-/* ===== TERMINAL SUCCESS ===== */
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
 .terminal-success {
-  color: var(--color-primary);
+  color: #00ff00;
   font-size: 13px;
-  margin-top: 8px;
-  text-shadow: 0 0 5px var(--color-primary);
+  margin-top: 10px;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+  animation: fadeIn 0.5s ease;
 }
 
-/* ===== DISCONNECT BUTTON ===== */
+/* =========================================
+   CURSOR
+========================================= */
+.cursor-blink {
+  display: inline-block;
+  width: 8px;
+  height: 1em;
+  background-color: #00ff00;
+  animation: blink 1s infinite steps(1);
+  margin-left: 3px;
+  box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0);
+  }
+}
+
+/* =========================================
+   DISCONNECT BUTTON & FOOTER STATUS
+========================================= */
 .disconnect-btn {
   position: fixed;
   bottom: 20px;
   right: 20px;
   background-color: transparent;
-  border: 1px solid var(--color-primary);
-  color: var(--color-primary);
-  padding: 8px 15px;
+  border: 1px solid #ff3333;
+  color: #ff3333;
+  padding: 8px 16px;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 4px;
   font-family: var(--font-mono);
-  font-size: 12px;
-  transition: all 0.3s ease;
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
-  font-weight: 500;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
   z-index: 100;
+  backdrop-filter: blur(5px);
 }
 
 .disconnect-btn:hover {
-  background-color: var(--color-primary);
-  color: var(--color-bg-dark);
-  box-shadow: 0 0 10px var(--color-primary);
+  background-color: #ff3333;
+  color: #000;
+  box-shadow: 0 0 15px rgba(255, 51, 51, 0.5);
+  transform: translateY(-2px);
 }
 
-/* ===== RESPONSIVE ===== */
+/* Status bar en bas */
+.terminal-footer-status {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  font-size: 11px;
+  color: rgba(0, 255, 0, 0.6);
+  z-index: 50;
+  font-family: var(--font-mono);
+}
+
+/* =========================================
+   EASTER EGG
+========================================= */
+.easter-egg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ff00ff;
+  font-size: 18px;
+  font-weight: bold;
+  text-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+  z-index: 1000;
+  animation: fadeIn 0.5s ease, fadeOut 0.5s ease 3.5s;
+  pointer-events: none;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+/* Scrollbar personnalisée pour la zone de messages */
+.terminal-main.fullscreen > div:first-child {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 0, 0.3) transparent;
+}
+
+.terminal-main.fullscreen > div:first-child::-webkit-scrollbar {
+  width: 6px;
+}
+
+.terminal-main.fullscreen > div:first-child::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.terminal-main.fullscreen > div:first-child::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 0, 0.3);
+  border-radius: 3px;
+}
+
+.terminal-main.fullscreen > div:first-child::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 0, 0.5);
+}
+
 @media (max-width: 768px) {
+  .terminal-main {
+    max-width: 90%;
+    padding: 25px;
+  }
+  
   .terminal-header {
-    flex-direction: column;
-    gap: 8px;
-    padding: 10px;
+    font-size: 10px;
+    padding: 6px 10px;
+  }
+  
+  .terminal-form-group label {
+    font-size: 11px;
+  }
+  
+  .terminal-form-group input {
+    padding: 10px 12px;
     font-size: 12px;
   }
-
-  .terminal-main {
-    padding: 15px;
-  }
-
-  .terminal-input-group input {
-    font-size: 13px;
-  }
-
-  .terminal-line {
-    font-size: 13px;
-  }
-
-  .disconnect-btn {
-    bottom: 15px;
-    right: 15px;
-    padding: 6px 12px;
-    font-size: 11px;
+  
+  .terminal-button {
+    padding: 12px 16px;
+    font-size: 12px;
   }
 }
 
 @media (max-width: 480px) {
-  .terminal-header {
-    font-size: 11px;
-    padding: 8px;
+  .terminal-layout {
+    padding: 15px;
   }
-
+  
   .terminal-main {
-    padding: 12px;
+    max-width: 100%;
+    padding: 20px;
   }
-
-  .terminal-input-group input {
-    font-size: 12px;
+  
+  .terminal-header {
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin-bottom: 20px;
+    font-size: 9px;
   }
-
-  .terminal-line {
-    font-size: 12px;
-    line-height: 1.6;
-  }
-
+  
   .disconnect-btn {
-    bottom: 10px;
-    right: 10px;
-    padding: 5px 10px;
+    bottom: 15px;
+    right: 15px;
+    padding: 8px 14px;
     font-size: 10px;
   }
 }
 
-
-/* ===== ANIMATIONS GLOBALES (vérifiez que celle-ci existe bien dans globals.css ou terminal.css) ===== */
-@keyframes typewriter {
-  from { width: 0; }
-  to { width: 100%; }
-}
-
-/* ===== TERMINAL LINE (MODIFICATION) ===== */
-.terminal-line {
-  color: var(--color-primary);
-  line-height: 1.8;
-  margin: 5px 0;
-  word-break: break-word;
-  /* L'ancienne animation 'typewriter' a été retirée d'ici */
-}
-
-/* NOUVELLE CLASSE POUR L'EFFET MACHINE À ÉCRIRE */
-.terminal-line.typewriter-effect {
-  overflow: hidden; /* Cache le texte qui n'est pas encore écrit */
-  white-space: nowrap; /* Force le texte à rester sur une seule ligne */
-  width: 0; /* Commence avec une largeur de 0 */
-  
-  /* L'animation est appliquée ici pour la durée correcte */
-  animation: 
-    typewriter steps(50, end) forwards, /* steps(N, end) où N est le nombre max de caractères */
-    cursor-blink 0.75s step-end infinite; /* Simule le curseur du terminal */
-}
-
-/* Le curseur clignotant est déplacé dans le composant TypewriterLine */
-.cursor-blink {
-  display: inline-block;
-  width: 7px; /* Largeur pour un meilleur visuel */
-  height: 1em;
-  background-color: var(--color-primary);
-  animation: blink 1s infinite steps(1); /* Utilise l'animation blink existante */
-  margin-left: 2px;
-}
-
-/* Retirer le clignotement pour le curseur une fois l'écriture terminée (dans le JS) 
-   -> Nous gérons le curseur manuellement dans le composant TypewriterLine.
-*/
-
-/* ... (Gardez vos styles existants) ... */
-
-/* ===== ANIMATIONS GLOBALES ===== */
-@keyframes blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0.3; }
-}
-
-@keyframes typewriter {
-  from { width: 0; }
-  to { width: 100%; }
-}
-
-
-
-/* ===== TERMINAL LINE (Modification) ===== */
-.terminal-line {
-  color: var(--color-primary);
-  line-height: 1.8;
-  margin: 5px 0;
-  word-break: break-word;
-}
-
-/* NOUVELLE CLASSE POUR L'EFFET MACHINE À ÉCRIRE */
-.terminal-line.typewriter-effect {
-  overflow: hidden; 
-  white-space: nowrap; 
-  width: 0; 
-  display: inline-block; /* Important pour que l'animation de width fonctionne */
-  
-  /* Utilise steps(50, end) pour l'effet de frappe saccadée (terminal) */
-  animation: 
-    typewriter steps(50, end) forwards; 
-}
-
-/* Curseur clignotant */
-.cursor-blink {
-  display: inline-block;
-  width: 7px; /* Largeur visible */
-  height: 1em;
-  background-color: var(--color-primary);
-  /* Animation de clignotement pour le curseur */
-  animation: blink 1s infinite steps(1); 
-  margin-left: 2px;
-}
-
-/* ===== AFFICHAGE BASE DE DONNÉES ===== */
-.db-list-container {
-  margin-top: 10px;
-  padding: 10px 0;
-  border: 1px solid var(--color-primary);
-  border-radius: 3px;
-  padding: 15px;
-  background-color: rgba(0, 255, 0, 0.05);
-}
-
-.db-title {
-  color: #ffff00; /* Jaune pour le titre */
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 5px;
-}
-
-.db-separator {
-  color: var(--color-primary);
-  opacity: 0.8;
-  font-size: 13px;
-  margin-bottom: 10px;
-}
-
-.user-data {
-  color: var(--color-primary); /* Vert par défaut */
-  font-size: 13px;
-  line-height: 1.6;
-  white-space: pre; /* Important pour l'alignement des espaces */
-}
-
-.admin-role {
-  color: #ff00ff !important; /* Magenta pour les admins */
-}
-
-.db-return-btn {
-  margin-top: 15px;
-  font-size: 12px;
-}
-
-@keyframes border-drawing {
-  0% {
-    clip-path: inset(0 100% 100% 0); /* Commence à 0% du haut à gauche */
-  }
-  25% {
-    clip-path: inset(0 0 100% 0); /* Dessine le haut */
-  }
-  50% {
-    clip-path: inset(0 0 0 0); /* Dessine le côté droit et le bas */
-  }
-  75% {
-    clip-path: inset(0 0 0 0); /* Dessine le côté gauche */
-  }
-  100% {
-    clip-path: inset(0 0 0 0); /* Bordure complète */
-  }
-}
-
-/* MODIFICATION/AJOUT pour le conteneur BDD */
-.db-list-container {
-  margin-top: 10px;
-  padding: 15px;
-  border: 1px solid var(--color-primary);
-  border-radius: 3px;
-  background-color: rgba(0, 255, 0, 0.05);
-  position: relative;
-  /* Masque tout au début */
-  opacity: 0; 
-  animation: fadeIn 0.5s ease-in forwards; 
-}
-
-/* NOUVEAU: Classe pour l'animation de dessin de la bordure */
-.db-draw-border {
-  /* Assurez-vous que l'élément a la bordure */
-  border: 1px solid var(--color-primary);
-  animation: border-drawing 1.5s linear forwards; 
-  clip-path: inset(0 100% 100% 0); /* Initialisation du clip */
-  /* Laisser le fond apparaître avant la bordure */
-  animation-delay: 0.3s; 
-}
-
-.db-title-container {
-  /* Pour s'assurer que le titre s'affiche au-dessus */
-  z-index: 10;
-}
-
-.db-title {
-  color: #ffff00; 
-  font-weight: bold;
-  text-align: left; /* Aligné à gauche pour l'effet machine à écrire */
-  margin-bottom: 5px;
-  font-family: var(--font-mono);
-}
-
-/* Animation fadeIn */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+/* =========================================
+   DATABASE VIEW
+========================================= */
 .db-list-container {
   margin-top: 20px;
-  padding: 15px;
-  border: 1px solid #00ff00;
-  border-radius: 3px;
-  background-color: rgba(0, 255, 0, 0.05);
+  padding: 20px;
+  border: 2px solid rgba(255, 255, 0, 0.6);
+  border-radius: 6px;
+  background-color: rgba(255, 255, 0, 0.03);
+  box-shadow: 0 0 15px rgba(255, 255, 0, 0.2);
+}
+
+.db-title-animated {
+  margin-bottom: 20px;
+}
+
+.db-title {
+  color: #ffff00;
+  text-align: center;
+  font-weight: bold;
+  font-family: monospace;
+  text-shadow: 0 0 10px rgba(255, 255, 0, 0.6);
+  font-size: 14px;
 }
 
 .db-border {
   color: #ffff00;
   text-align: center;
   font-family: monospace;
+  text-shadow: 0 0 5px rgba(255, 255, 0, 0.4);
+  font-size: 14px;
 }
 
-.db-title {
-  color: #ffff00;
-  text-align: center;
-  font-weight: bold;
-  font-family: monospace;
+.db-separator {
+  color: #00ff00;
+  opacity: 0.8;
+  font-size: 13px;
+  margin-bottom: 10px;
 }
+
+.user-data {
+  color: #00ff00;
+  font-size: 12px;
+  line-height: 1.8;
+  white-space: pre;
+  font-family: monospace;
+  text-shadow: 0 0 3px rgba(0, 255, 0, 0.3);
+}
+
+/* Ligne admin en magenta */
+.user-data.admin-role {
+  color: #ff00ff !important;
+  text-shadow: 0 0 5px rgba(255, 0, 255, 0.5);
+}
+
+/* Total utilisateurs en cyan */
+.db-total-info {
+  color: #00ffff;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+/* Bouton retour BDD */
+.db-return-btn {
+  border-color: #ffff00 !important;
+  color: #ffff00 !important;
+  width: auto !important;
+  padding: 10px 20px !important;
+  margin-top: 20px !important;
+}
+
+.db-return-btn:hover {
+  background-color: #ffff00 !important;
+  color: #000 !important;
+  box-shadow: 0 0 20px rgba(255, 255, 0, 0.6) !important;
+}
+
+/* =========================================
+   INPUT SECTION (pour page translator)
+========================================= */
+.terminal-input-group {
+  position: fixed !important;
+  bottom: 60px !important;
+  left: 20px !important;
+  right: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 12px 0 !important;
+  background: none !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-top: 1px solid rgba(0, 255, 0, 0.3) !important;
+  border-radius: 0 !important;
+  z-index: 50 !important;
+  outline: 0 !important;
+  outline-width: 0 !important;
+  outline-style: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+}
+
+/* Supprimer TOUS les états possibles du form */
+.terminal-input-group:hover,
+.terminal-input-group:focus,
+.terminal-input-group:active,
+.terminal-input-group:focus-within,
+.terminal-input-group:focus-visible {
+  border: 0 !important;
+  border-top: 1px solid rgba(0, 255, 0, 0.3) !important;
+  outline: 0 !important;
+  outline-width: 0 !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+}
+
+.terminal-input-group::before {
+  content: "> ";
+  color: rgba(0, 255, 0, 0.6);
+  font-weight: bold;
+  font-size: 16px;
+  min-width: 20px;
+}
+
+.terminal-input-group input {
+  flex: 1 !important;
+  background: none !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-radius: 0 !important;
+  color: #00ff00 !important;
+  font-family: var(--font-mono) !important;
+  font-size: 14px !important;
+  outline: 0 !important;
+  outline-width: 0 !important;
+  outline-style: none !important;
+  outline-offset: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+.terminal-input-group input::placeholder {
+  color: rgba(0, 255, 0, 0.3) !important;
+  font-style: italic;
+}
+
+/* Tous les états de l'input - OVERRIDE globals.css */
+.terminal-input-group input:hover,
+.terminal-input-group input:focus,
+.terminal-input-group input:active,
+.terminal-input-group input:focus-visible {
+  outline: 0 !important;
+  outline-width: 0 !important;
+  outline-offset: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  -webkit-box-shadow: none !important;
+}
+
+/* =========================================
+   SCROLLBAR HIDDEN & GLOBAL OVERFLOW
+========================================= */
+
+/* Cacher complètement la scrollbar */
+.terminal-main.fullscreen > div:first-of-type {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.terminal-main.fullscreen > div:first-of-type::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
+  width: 0;
+  height: 0;
+}
+
+/* Style global body pour éviter les scrollbars */
+body {
+  overflow: hidden !important;
+}
+
+/* Override overflow sur layout fullscreen */
+.terminal-layout.fullscreen {
+  overflow: hidden !important;
+}
+
+
 

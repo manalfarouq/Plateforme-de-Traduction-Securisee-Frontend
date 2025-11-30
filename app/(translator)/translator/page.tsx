@@ -51,7 +51,8 @@ export default function TranslatorPage() {
 
   const [animatedUserIndex, setAnimatedUserIndex] = useState(-1); 
   const [animatedUserLines, setAnimatedUserLines] = useState<string[]>([]); 
-  const [titleAnimationFinished, setTitleAnimationFinished] = useState(false); 
+  const [titleAnimationFinished, setTitleAnimationFinished] = useState(false);
+  const [showReturnButton, setShowReturnButton] = useState(false); // NOUVEAU
 
   useEffect(() => {
     if (isChecking) return;
@@ -93,8 +94,14 @@ export default function TranslatorPage() {
   const advanceUserAnimation = useCallback(() => {
     setAnimatedUserIndex((prev) => {
       const nextIndex = prev + 1;
-      const totalLines = users.length + 1; // +1 pour l'en-tête
-      return nextIndex <= totalLines ? nextIndex : totalLines;
+      const totalLines = users.length + 1;
+      
+      // NOUVEAU: Afficher le bouton quand on arrive à la dernière ligne
+      if (nextIndex >= totalLines) {
+        setTimeout(() => setShowReturnButton(true), 100);
+      }
+      
+      return nextIndex;
     });
   }, [users.length]);
 
@@ -104,11 +111,17 @@ export default function TranslatorPage() {
 
   const currentUserLineToAnimate = useMemo(() => {
     if (!showUserList || users.length === 0 || animatedUserIndex < 0) return null;
-    if (animatedUserIndex === 0) return formatUserLine(null, true); // header
+    if (animatedUserIndex === 0) return formatUserLine(null, true);
     if (animatedUserIndex > 0 && animatedUserIndex <= users.length)
-      return formatUserLine(users[animatedUserIndex - 1]); // lignes utilisateurs
+      return formatUserLine(users[animatedUserIndex - 1]);
+    
+    // Si on a fini toutes les lignes, afficher le bouton
+    if (animatedUserIndex > users.length && !showReturnButton) {
+      setTimeout(() => setShowReturnButton(true), 100);
+    }
+    
     return null;
-  }, [animatedUserIndex, showUserList, users]);
+  }, [animatedUserIndex, showUserList, users, showReturnButton]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,10 +135,11 @@ export default function TranslatorPage() {
     setAnimatedUserIndex(-1);
     setAnimatedUserLines([]);
     setTitleAnimationFinished(false);
+    setShowReturnButton(false); // NOUVEAU: Réinitialiser le bouton
 
     enqueueMessage({ type: "user", text: `> ${username.toUpperCase()}: ${userMessage}` });
 
-    // ✅ COMMANDE /users ou /admin
+    // COMMANDE /users ou /admin
     if (userMessage === "/users" || userMessage === "/admin") {
       if (userRole !== "admin") {
         enqueueMessage({
@@ -163,7 +177,7 @@ export default function TranslatorPage() {
       return;
     }
 
-    // ✅ COMMANDE /swap
+    // COMMANDE /swap
     if (userMessage === "/swap") {
       const newDirection = direction === "FR->EN" ? "EN->FR" : "FR->EN";
       setDirection(newDirection);
@@ -174,7 +188,7 @@ export default function TranslatorPage() {
       return;
     }
 
-    // ✅ COMMANDE /clear
+    // COMMANDE /clear
     if (userMessage === "/clear") {
       setMessagesQueue([]);
       setDisplayedMessages([]);
@@ -186,7 +200,7 @@ export default function TranslatorPage() {
       return;
     }
 
-    // ✅ COMMANDE /help
+    // COMMANDE /help
     if (userMessage === "/help") {
       const helpText = userRole === "admin"
         ? ">>> ZORO: Commandes: /swap (changer direction) | /clear (effacer) | /users (liste utilisateurs) | /help (aide)"
@@ -199,7 +213,7 @@ export default function TranslatorPage() {
       return;
     }
 
-    // ✅ TRADUCTION (si ce n'est pas une commande)
+    // TRADUCTION
     setIsLoading(true);
     try {
       const translation = await apiService.translate(userMessage, direction);
@@ -229,33 +243,39 @@ export default function TranslatorPage() {
     }
   };
 
+  const handleReturnToTranslator = () => {
+    setShowUserList(false);
+    setUsers([]);
+    setAnimatedUserIndex(-1);
+    setAnimatedUserLines([]);
+    setTitleAnimationFinished(false);
+    setShowReturnButton(false);
+    setMessagesQueue([]);
+    setDisplayedMessages([]);
+    setCurrentMessage(null);
+  };
+
   return (
     <>
-      <div className="terminal-line">
-        zoro v2.47 | {direction} | {username?.toUpperCase()}
+      {/* Info de direction et role */}
+      <div className="terminal-line" style={{ marginBottom: "15px" }}>
+        <span style={{ color: "#00ffff", fontWeight: "600" }}>
+          ▸ Mode: {direction}
+        </span>
         {userRole === "admin" && (
-          <span style={{ color: "#ff00ff", marginLeft: "10px" }}>
-            [ADMIN]
+          <span style={{ color: "#ff00ff", marginLeft: "20px", fontWeight: "600" }}>
+            ● ADMIN ACCESS GRANTED
           </span>
         )}
       </div>
 
       {error && (
-        <div
-          style={{
-            color: "#ff6b6b",
-            marginTop: "10px",
-            padding: "10px",
-            border: "1px solid #ff6b6b",
-            borderRadius: "3px",
-            fontSize: "12px",
-          }}
-        >
-          Erreur: {error}
+        <div className="terminal-error">
+          ⚠ Erreur: {error}
         </div>
       )}
 
-      <div style={{ marginTop: "20px", flexGrow: 1, overflow: "auto" }}>
+      <div style={{ marginTop: "20px", flexGrow: 1, overflow: "auto", display: "flex", flexDirection: "column", alignItems: showUserList ? "center" : "flex-start" }}>
         
         {!showUserList && (
           <>
@@ -321,7 +341,7 @@ export default function TranslatorPage() {
             </div>
 
             {titleAnimationFinished && (
-              <div style={{ marginTop: "15px" }}>
+              <div style={{ marginTop: "15px", width: "100%" }}>
                 {animatedUserLines.map((line, idx) => (
                   <div
                     key={`user-line-${idx}`}
@@ -329,6 +349,7 @@ export default function TranslatorPage() {
                     style={{
                       color: line.includes("ADMIN") ? "#ff00ff" : "#00ff00",
                       whiteSpace: "pre",
+                      textAlign: "center",
                     }}
                   >
                     {line}
@@ -356,22 +377,17 @@ export default function TranslatorPage() {
               </div>
             )}
 
-            {animatedUserIndex > users.length && (
+            {/* NOUVEAU: Le bouton reste visible une fois affiché */}
+            {showReturnButton && (
               <button
-                onClick={() => {
-                  setShowUserList(false);
-                  setUsers([]);
-                  setAnimatedUserIndex(-1);
-                  setAnimatedUserLines([]);
-                  setTitleAnimationFinished(false);
-                  setMessagesQueue([]);
-                  setDisplayedMessages([]);
-                  setCurrentMessage(null);
-                }}
+                onClick={handleReturnToTranslator}
                 className="terminal-button db-return-btn"
-                style={{ marginTop: "15px" }}
+                style={{
+                  position: "relative",
+                  zIndex: 100
+                }}
               >
-                ← Retour au traducteur
+                ← RETOUR AU TRADUCTEUR
               </button>
             )}
           </div>
@@ -391,11 +407,13 @@ export default function TranslatorPage() {
             />
           </form>
 
-          <div style={{ fontSize: "12px", marginTop: "10px", opacity: 0.7 }}>
+          <div className="terminal-footer-status">
             {userRole === "admin" 
               ? "Commandes: /swap /clear /users /help | Status: " 
               : "Commandes: /swap /clear /help | Status: "}
-            {isLoading ? "Traitement..." : "Prêt"}
+            <span style={{ color: isLoading ? "#ffff00" : "#00ffff" }}>
+              {isLoading ? "⟳ Traitement..." : "✓ Prêt"}
+            </span>
           </div>
 
           <button
